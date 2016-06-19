@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copy">&#xe805;</string>
+    <string name="swap">&#xe807;</string>
+    <string name="retry">&#xe806;</string>
+    <string name="clear">&#xe804;</string>
+    <string name="share">&#xe803;</string>
+    <string name="speak">&#xe801;</string>
+    <string name="pause">&#xe800;</string>
+    <string name="listen">&#xe802;</string>
+    <string name="appName">TinyTranslator</string>
+    <string name="copyMessage">Translation copied to clipboard</string>
+    <string name="placeholder">Type text here</string>
+    <string name="errorMessage">Request failed</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textSize">18sp</dimen>
+    <dimen name="iconSize">24sp</dimen>
+    <dimen name="iconWidth">48dp</dimen>
+</resources>
