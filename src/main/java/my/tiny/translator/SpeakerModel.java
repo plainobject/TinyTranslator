@@ -89,7 +89,8 @@ public class SpeakerModel extends Model {
     public boolean isValid() {
         String text = getProperty("text");
         return initialized == true && !text.isEmpty() &&
-               text.length() < TextToSpeech.getMaxSpeechInputLength() && isLanguageAvailable();
+               text.length() < TextToSpeech.getMaxSpeechInputLength() &&
+               Utils.hasLetterOrDigit(text) && isLanguageAvailable();
     }
 
     public boolean isSpeaking() {

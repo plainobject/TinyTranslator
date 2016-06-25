@@ -86,6 +86,15 @@ public final class Utils {
                text.substring(1);
     }
 
+    public static boolean hasLetterOrDigit(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isLetterOrDigit(text.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String encodeURIComponent(String component) {
         try {
             return URLEncoder.encode(component, "UTF-8");
