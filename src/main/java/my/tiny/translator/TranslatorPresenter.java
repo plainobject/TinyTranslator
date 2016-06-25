@@ -47,6 +47,11 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
             return;
         }
 
+        if (event.type.equals("update")) {
+            dispatchEvent(new Event("update", null));
+            return;
+        }
+
         if (event.type.equals("change")) {
             String name = event.data.get("name");
             String value = event.data.get("value");
@@ -70,7 +75,7 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                     getView().setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);
                     HashMap<String, String> eventData = new HashMap<String, String>();
                     eventData.put("translation", value);
-                    dispatchEvent(new Event("update", eventData));
+                    dispatchEvent(new Event("change", eventData));
                     break;
             }
         }

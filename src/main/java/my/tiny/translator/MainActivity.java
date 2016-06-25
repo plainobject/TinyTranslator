@@ -35,6 +35,7 @@ import my.tiny.translator.core.EventListener;
 
 public class MainActivity extends Activity {
     private static final int SPEECH_RECOGNITION_CODE = 1;
+    private static final String MIMETYPE_TEXT_PLAIN = "text/plain";
     private Model mainModel = new Model();
     private ArrayList<String> recognizerLangs = new ArrayList<String>();
     private Typeface iconFont;
@@ -44,7 +45,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        iconFont = Typeface.createFromAsset(getAssets(), "icons.ttf");
+        iconFont = Typeface.createFromAsset(getAssets(), Config.ICONFONT_FILENAME);
 
         initCopy();
         initSwap();
@@ -71,7 +72,7 @@ public class MainActivity extends Activity {
         String intentType = intent.getType();
         String intentAction = intent.getAction();
 
-        if (Intent.ACTION_SEND.equals(intentAction) && "text/plain".equals(intentType)) {
+        if (Intent.ACTION_SEND.equals(intentAction) && MIMETYPE_TEXT_PLAIN.equals(intentType)) {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (sharedText != null) {
                 mainModel.setProperty("text", sharedText);
@@ -99,7 +100,7 @@ public class MainActivity extends Activity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, text);
-        intent.setType("text/plain");
+        intent.setType(MIMETYPE_TEXT_PLAIN);
         startActivity(intent);
     }
 
@@ -593,6 +594,9 @@ public class MainActivity extends Activity {
                         retryButton.setVisibility(View.GONE);
                         progressDebouncer.cancel();
                         Utils.fadeOutView(progressLayout, Config.PROGRESS_FADE_DURATION);
+                        break;
+
+                    case "change":
                         mainModel.setProperty("translation", event.data.get("translation"));
                         break;
 

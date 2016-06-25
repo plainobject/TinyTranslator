@@ -31,6 +31,7 @@ public class TranslatorModel extends Model {
                 dispatchEvent(new Event("error", null));
             } else {
                 setProperty("translation", dataProvider.parseResponse(response));
+                dispatchEvent(new Event("update", null));
             }
         }
     }
