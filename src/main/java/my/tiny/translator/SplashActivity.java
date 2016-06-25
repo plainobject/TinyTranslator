@@ -31,25 +31,25 @@ public class SplashActivity extends Activity {
 
     @Override
     public void onPause() {
+        super.onPause();
         if (handler != null && runnable != null) {
             handler.removeCallbacks(runnable);
         }
-        super.onPause();
     }
 
     @Override
     public void onResume() {
+        super.onResume();
         if (handler != null && runnable != null) {
             handler.postDelayed(runnable, Config.SPLASH_DELAY);
         }
-        super.onResume();
     }
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (handler != null && runnable != null) {
             handler.removeCallbacks(runnable);
         }
-        super.onBackPressed();
     }
 }

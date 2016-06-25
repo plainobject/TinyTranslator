@@ -55,6 +55,8 @@ public class MainActivity extends Activity {
         initTextarea();
         initTranslator();
         requestRecognizerLangs();
+
+        onNewIntent(getIntent());
     }
 
     @Override
@@ -64,14 +66,28 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String intentType = intent.getType();
+        String intentAction = intent.getAction();
+
+        if (Intent.ACTION_SEND.equals(intentAction) && "text/plain".equals(intentType)) {
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (sharedText != null) {
+                mainModel.setProperty("text", sharedText);
+            }
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SPEECH_RECOGNITION_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> list = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             String text = list.get(0);
             text = Utils.capitalizeText(text, mainModel.getProperty("sourceLang"));
             mainModel.setProperty("text", text);
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void copyText(String text) {
