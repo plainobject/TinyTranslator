@@ -50,7 +50,8 @@
             android:id="@+id/textarea"
             android:hint="@string/placeholder"
             android:maxLines="5"
-            android:inputType="textMultiLine|textNoSuggestions">
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:background="@drawable/textbox">
                 <requestFocus/>
         </EditText>
         <LinearLayout
@@ -58,7 +59,7 @@
             android:gravity="end"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="48dp">
             <Button
                 style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/retryButton"
@@ -97,17 +98,18 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="0dp">
         <ScrollView
+            android:id="@+id/translationWrapper"
             android:fillViewport="true"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="64dp">
             <LinearLayout
                 android:clickable="true"
                 android:orientation="vertical"
@@ -119,42 +121,46 @@
                     android:id="@+id/translation"
                     android:visibility="gone"
                     android:textIsSelectable="true"/>
-                <LinearLayout
-                    style="?android:attr/buttonBarStyle"
-                    android:gravity="end"
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <Button
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:id="@+id/copyButton"
-                        android:text="@string/copy"
-                        android:textSize="@dimen/iconSize"
-                        android:textColor="@color/main"
-                        android:visibility="gone"
-                        android:layout_width="@dimen/iconWidth"
-                        android:layout_height="wrap_content"/>
-                    <Button
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:id="@+id/targetSpeakButton"
-                        android:text="@string/speak"
-                        android:textSize="@dimen/iconSize"
-                        android:textColor="@color/main"
-                        android:visibility="gone"
-                        android:layout_width="@dimen/iconWidth"
-                        android:layout_height="wrap_content"/>
-                    <Button
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:id="@+id/shareButton"
-                        android:text="@string/share"
-                        android:textSize="@dimen/iconSize"
-                        android:textColor="@color/main"
-                        android:visibility="gone"
-                        android:layout_width="@dimen/iconWidth"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
             </LinearLayout>
         </ScrollView>
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_below="@+id/translationWrapper"
+            android:layout_height="48dp"
+            android:layout_marginTop="-64dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp">
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/copyButton"
+                android:text="@string/copy"
+                android:textSize="@dimen/iconSize"
+                android:textColor="@color/main"
+                android:visibility="gone"
+                android:layout_width="@dimen/iconWidth"
+                android:layout_height="wrap_content"/>
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/targetSpeakButton"
+                android:text="@string/speak"
+                android:textSize="@dimen/iconSize"
+                android:textColor="@color/main"
+                android:visibility="gone"
+                android:layout_width="@dimen/iconWidth"
+                android:layout_height="wrap_content"/>
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/shareButton"
+                android:text="@string/share"
+                android:textSize="@dimen/iconSize"
+                android:textColor="@color/main"
+                android:visibility="gone"
+                android:layout_width="@dimen/iconWidth"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
         <RelativeLayout
             android:id="@+id/progressLayout"
             android:clickable="true"
@@ -162,12 +168,13 @@
             android:background="@color/progressBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:focusableInTouchMode="true">
+            android:focusableInTouchMode="true"
+            android:layout_alignParentTop="true">
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:layout_centerHorizontal="true"/>
         </RelativeLayout>
-    </FrameLayout>
+    </RelativeLayout>
 </LinearLayout>

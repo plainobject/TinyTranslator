@@ -590,16 +590,11 @@ public class MainActivity extends Activity {
                         showToast(getString(R.string.errorMessage));
                         break;
 
-                    case "update":
-                        retryButton.setVisibility(View.GONE);
-                        progressDebouncer.cancel();
-                        Utils.fadeOutView(progressLayout, Config.PROGRESS_FADE_DURATION);
-                        break;
-
                     case "change":
                         mainModel.setProperty("translation", event.data.get("translation"));
                         break;
 
+                    case "update":
                     case "invalid":
                         retryButton.setVisibility(View.GONE);
                         progressDebouncer.cancel();
