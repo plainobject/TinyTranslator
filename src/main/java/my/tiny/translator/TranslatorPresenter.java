@@ -24,7 +24,7 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
     }
 
     public void setText(String text) {
-        getModel().setProperty("text", text);
+        getModel().setProperty("text", Utils.normalizeText(text));
     }
 
     public void setSourceLang(String lang) {
@@ -38,17 +38,17 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
     @Override
     public void handleEvent(Event event) {
         if (event.type.equals("query")) {
-            dispatchEvent(new Event("query", null));
+            dispatchEvent(new Event("query"));
             return;
         }
 
         if (event.type.equals("error")) {
-            dispatchEvent(new Event("error", null));
+            dispatchEvent(new Event("error"));
             return;
         }
 
         if (event.type.equals("update")) {
-            dispatchEvent(new Event("update", null));
+            dispatchEvent(new Event("update"));
             return;
         }
 
@@ -64,7 +64,7 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                         model.cancelTask();
                         model.setProperty("translation", "");
                         requestDebouncer.cancel();
-                        dispatchEvent(new Event("invalid", null));
+                        dispatchEvent(new Event("invalid"));
                         break;
                     }
                     requestTranslation();

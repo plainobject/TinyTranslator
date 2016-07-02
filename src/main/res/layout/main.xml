@@ -121,6 +121,12 @@
                     android:id="@+id/translation"
                     android:visibility="gone"
                     android:textIsSelectable="true"/>
+                <TextView
+                    style="@style/TextBox"
+                    android:id="@+id/dictionary"
+                    android:textColor="@color/gray"
+                    android:visibility="gone"
+                    android:textIsSelectable="true"/>
             </LinearLayout>
         </ScrollView>
         <LinearLayout

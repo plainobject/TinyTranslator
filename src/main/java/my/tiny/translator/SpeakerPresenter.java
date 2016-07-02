@@ -33,7 +33,7 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
     }
 
     public void setText(String text) {
-        getModel().setProperty("text", text);
+        getModel().setProperty("text", Utils.normalizeText(text));
     }
 
     public void setLang(String lang) {
@@ -45,7 +45,7 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
         switch (event.type) {
             case "stop":
             case "start":
-                dispatchEvent(new Event(event.type, null));
+                dispatchEvent(new Event(event.type));
                 break;
 
             case "change":

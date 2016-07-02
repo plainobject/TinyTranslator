@@ -55,6 +55,7 @@ public class MainActivity extends Activity {
         initSpinners();
         initTextarea();
         initTranslator();
+        initDictionary();
         requestRecognizerLangs();
 
         onNewIntent(getIntent());
@@ -63,7 +64,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mainModel.dispatchEvent(new Event("destroy", null));
+        mainModel.dispatchEvent(new Event("destroy"));
     }
 
     @Override
@@ -258,7 +259,7 @@ public class MainActivity extends Activity {
                     String value = event.data.get("value");
                     switch (event.data.get("name")) {
                         case "text":
-                            sourceSpeakerPresenter.setText(Utils.normalizeText(value));
+                            sourceSpeakerPresenter.setText(value);
                             break;
 
                         case "sourceLang":
@@ -270,7 +271,7 @@ public class MainActivity extends Activity {
                             break;
 
                         case "translation":
-                            targetSpeakerPresenter.setText(Utils.normalizeText(value));
+                            targetSpeakerPresenter.setText(value);
                             break;
                     }
                     return;
@@ -554,7 +555,7 @@ public class MainActivity extends Activity {
                     String value = event.data.get("value");
                     switch (event.data.get("name")) {
                         case "text":
-                            translatorPresenter.setText(Utils.normalizeText(value));
+                            translatorPresenter.setText(value);
                             break;
 
                         case "sourceLang":
@@ -603,8 +604,44 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        translatorPresenter.setText(mainModel.getProperty("text").trim());
+        translatorPresenter.setText(mainModel.getProperty("text"));
         translatorPresenter.setSourceLang(mainModel.getProperty("sourceLang"));
         translatorPresenter.setTargetLang(mainModel.getProperty("targetLang"));
+    }
+
+    public void initDictionary() {
+        TextView dictionaryView = (TextView) findViewById(R.id.dictionary);
+        DictionaryModel dictionaryModel = new DictionaryModel(new YandexDictionaryProvider(
+            Config.DICTIONARY_APIURL,
+            Config.DICTIONARY_APIKEY
+        ));
+        final TranslatorPresenter dictionaryPresenter = new TranslatorPresenter(
+            dictionaryView,
+            dictionaryModel
+        );
+        mainModel.addListener(new EventListener() {
+            @Override
+            public void handleEvent(Event event) {
+                if (event.type.equals("change")) {
+                    String value = event.data.get("value");
+                    switch (event.data.get("name")) {
+                        case "text":
+                            dictionaryPresenter.setText(value);
+                            break;
+
+                        case "sourceLang":
+                            dictionaryPresenter.setSourceLang(value);
+                            break;
+
+                        case "targetLang":
+                            dictionaryPresenter.setTargetLang(value);
+                            break;
+                    }
+                }
+            }
+        });
+        dictionaryPresenter.setText(mainModel.getProperty("text"));
+        dictionaryPresenter.setSourceLang(mainModel.getProperty("sourceLang"));
+        dictionaryPresenter.setTargetLang(mainModel.getProperty("targetLang"));
     }
 }

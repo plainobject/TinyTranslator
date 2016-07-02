@@ -6,8 +6,8 @@ import java.util.HashMap;
 import my.tiny.translator.core.DataProvider;
 
 public class YandexDataProvider implements DataProvider {
-    private String url;
-    private String key;
+    protected String url;
+    protected String key;
 
     public static final HashMap<String, String> langs;
     static {

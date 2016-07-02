@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="main">#477099</color>
+    <color name="gray">#777777</color>
     <color name="background">#fcfcfc</color>
     <color name="progressBackground">#ccfcfcfc</color>
 </resources>

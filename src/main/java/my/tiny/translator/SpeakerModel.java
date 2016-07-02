@@ -29,30 +29,30 @@ public class SpeakerModel extends Model {
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onDone(final String utteranceId) {
-                dispatchEvent(new Event("stop", null));
+                dispatchEvent(new Event("stop"));
             }
 
             @Override
             @Deprecated
             public void onError(final String utteranceId) {
-                dispatchEvent(new Event("stop", null));
+                dispatchEvent(new Event("stop"));
             }
 
             @Override
             public void onError(final String utteranceId, final int errorCode) {
-                dispatchEvent(new Event("stop", null));
+                dispatchEvent(new Event("stop"));
             }
 
             @Override
             public void onStart(final String utteranceId) {
-                dispatchEvent(new Event("start", null));
+                dispatchEvent(new Event("start"));
             }
         });
     }
 
     public void stop() {
         tts.stop();
-        dispatchEvent(new Event("stop", null));
+        dispatchEvent(new Event("stop"));
     }
 
     public void speak() {

@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Locale;
+import java.util.Collection;
 import java.lang.StringBuilder;
 import android.view.View;
 import android.animation.Animator;
@@ -93,6 +94,21 @@ public final class Utils {
             }
         }
         return false;
+    }
+
+    public static String joinWithSeparator(Collection<?> values, String separator) {
+        if (values == null) {
+            return "";
+        }
+        if (separator == null) {
+            separator = "";
+        }
+        StringBuilder result = new StringBuilder();
+        for (Object value : values) {
+            result.append(separator);
+            result.append(value.toString());
+        }
+        return result.toString().substring(separator.length());
     }
 
     public static String encodeURIComponent(String component) {

@@ -6,6 +6,10 @@ public class Event {
     public String type;
     public HashMap<String, String> data;
 
+    public Event(String type) {
+        this.type = type;
+    }
+
     public Event(String type, HashMap<String, String> data) {
         this.type = type;
         this.data = data;

@@ -8,8 +8,8 @@ import my.tiny.translator.core.Model;
 import my.tiny.translator.core.DataProvider;
 
 public class TranslatorModel extends Model {
-    private DataProvider dataProvider;
-    private TranslateTask translateTask = null;
+    protected DataProvider dataProvider;
+    protected TranslateTask translateTask = null;
     private static final int REQUEST_TIMEOUT = 10000;
 
     private class TranslateTask extends AsyncTask<String, Void, String> {
@@ -28,10 +28,10 @@ public class TranslatorModel extends Model {
                 return;
             }
             if (response == null) {
-                dispatchEvent(new Event("error", null));
+                dispatchEvent(new Event("error"));
             } else {
                 setProperty("translation", dataProvider.parseResponse(response));
-                dispatchEvent(new Event("update", null));
+                dispatchEvent(new Event("update"));
             }
         }
     }
@@ -63,7 +63,7 @@ public class TranslatorModel extends Model {
         if (!isValid()) {
             return;
         }
-        dispatchEvent(new Event("query", null));
+        dispatchEvent(new Event("query"));
         translateTask = new TranslateTask();
         translateTask.execute(dataProvider.generateUrl(
             getProperty("text"),
