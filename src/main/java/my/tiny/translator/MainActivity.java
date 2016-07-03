@@ -551,6 +551,11 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
+                if (event.type.equals("retry")) {
+                    translatorPresenter.requestTranslation();
+                    return;
+                }
+
                 if (event.type.equals("change")) {
                     String value = event.data.get("value");
                     switch (event.data.get("name")) {
@@ -573,7 +578,7 @@ public class MainActivity extends Activity {
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                translatorPresenter.requestTranslation();
+                mainModel.dispatchEvent(new Event("retry"));
             }
         });
         translatorPresenter.addListener(new EventListener() {
@@ -622,6 +627,11 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
+                if (event.type.equals("retry")) {
+                    dictionaryPresenter.requestTranslation();
+                    return;
+                }
+
                 if (event.type.equals("change")) {
                     String value = event.data.get("value");
                     switch (event.data.get("name")) {
