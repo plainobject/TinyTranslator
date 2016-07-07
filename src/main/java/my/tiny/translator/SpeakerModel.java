@@ -16,6 +16,14 @@ public class SpeakerModel extends Model {
     private TextToSpeech tts = null;
     private boolean initialized = false;
     private static final String UTTERANCE_ID = "12345";
+
+    private static final HashMap<String, String> countryMap;
+    static {
+        countryMap = new HashMap<String, String>();
+        countryMap.put("en", "GB");
+        countryMap.put("es", "ES");
+        countryMap.put("fr", "FR");
+    }
     
     public SpeakerModel(Context context) {
         tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
@@ -59,7 +67,7 @@ public class SpeakerModel extends Model {
         if (!isValid()) {
             return;
         }
-        tts.setLanguage(new Locale(getProperty("lang")));
+        tts.setLanguage(getAvailableLocale());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             speakOld();
         } else {
@@ -90,20 +98,28 @@ public class SpeakerModel extends Model {
         String text = getProperty("text");
         return initialized == true && !text.isEmpty() &&
                text.length() < TextToSpeech.getMaxSpeechInputLength() &&
-               Utils.hasLetterOrDigit(text) && isLanguageAvailable();
+               Utils.hasLetterOrDigit(text) && getAvailableLocale() != null;
     }
 
     public boolean isSpeaking() {
         return tts.isSpeaking();
     }
 
-    public boolean isLanguageAvailable() {
+    public Locale getAvailableLocale() {
         String lang = getProperty("lang");
         if (lang.isEmpty()) {
-            return false;
+            return null;
         }
-        int result = tts.isLanguageAvailable(new Locale(lang));
-        return result != TextToSpeech.LANG_MISSING_DATA &&
-               result != TextToSpeech.LANG_NOT_SUPPORTED;
+        if (countryMap.containsKey(lang)) {
+            Locale countryLocale = new Locale(lang, countryMap.get(lang));
+            if (tts.isLanguageAvailable(countryLocale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
+                return countryLocale;
+            }
+        }
+        Locale locale = new Locale(lang);
+        if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_AVAILABLE) {
+            return locale;
+        }
+        return null;
     }
 }

@@ -51,6 +51,7 @@
             android:hint="@string/placeholder"
             android:maxLines="5"
             android:inputType="textMultiLine|textNoSuggestions"
+            android:scrollbars="vertical"
             android:background="@drawable/textbox">
                 <requestFocus/>
         </EditText>
