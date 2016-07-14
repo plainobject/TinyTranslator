@@ -16,7 +16,7 @@ public class DictionaryModel extends TranslatorModel {
         String sourceLang = getProperty("sourceLang");
         String targetLang = getProperty("targetLang");
         return !text.isEmpty() && text.length() < dataProvider.getTextLimit() &&
-               !text.contains(NEW_LINE) && text.split("\\s+").length <= MAX_TOKENS &&
+               !text.contains(NEW_LINE) && Utils.getStringTokens(text).length <= MAX_TOKENS &&
                !sourceLang.isEmpty() && !targetLang.isEmpty() &&
                dataProvider.isLanguageSupported(sourceLang + "-" + targetLang);
     }

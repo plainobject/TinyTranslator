@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Locale;
 import java.util.Collection;
+import java.util.regex.Pattern;
 import java.lang.StringBuilder;
 import android.view.View;
 import android.animation.Animator;
@@ -20,6 +21,10 @@ public final class Utils {
     private Utils() {}
 
     public static int STATUS_OK = 200;
+
+    public static Pattern TOKENS_PATTERN = Pattern.compile("\\s+");
+
+    public static Pattern NORMALIZE_PATTERN = Pattern.compile("[^\\S\\n]+");
 
     public static void fadeInView(View view, long duration) {
         if (view.getVisibility() == View.VISIBLE) {
@@ -79,12 +84,16 @@ public final class Utils {
     }
 
     public static String normalizeText(String text) {
-        return text.replaceAll("[^\\S\\n]+", " ").trim();
+        return NORMALIZE_PATTERN.matcher(text).replaceAll(" ").trim();
     }
 
     public static String capitalizeText(String text, String lang) {
         return text.substring(0, 1).toUpperCase(new Locale(lang)) +
                text.substring(1);
+    }
+
+    public static String[] getStringTokens(String str) {
+        return TOKENS_PATTERN.split(str);
     }
 
     public static boolean hasLetterOrDigit(String text) {
