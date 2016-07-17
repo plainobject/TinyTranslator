@@ -7,11 +7,10 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
     <RelativeLayout
-        style="?android:attr/buttonBarStyle"
         android:elevation="4dp"
         android:background="@color/main"
         android:layout_width="match_parent"
-        android:layout_height="56dp">
+        android:layout_height="@dimen/toolbarHeight">
         <Spinner
             android:id="@+id/sourceLang"
             android:gravity="end"
@@ -21,13 +20,13 @@
             android:layout_toStartOf="@+id/swapButton"
             android:layout_centerVertical="true"/>
         <Button
-            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/swapButton"
             android:text="@string/swap"
             android:textSize="@dimen/iconSize"
             android:textColor="@android:color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_width="@dimen/toolbarHeight"
+            android:layout_height="match_parent"
             android:layout_centerInParent="true"/>
         <Spinner
             android:id="@+id/targetLang"
@@ -56,47 +55,46 @@
                 <requestFocus/>
         </EditText>
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
             android:gravity="end"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="48dp">
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/retryButton"
                 android:text="@string/retry"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/sourceSpeakButton"
                 android:text="@string/speak"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/clearButton"
                 android:text="@string/clear"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/recognizeButton"
                 android:text="@string/listen"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
         </LinearLayout>
     </LinearLayout>
     <RelativeLayout
@@ -131,7 +129,6 @@
             </LinearLayout>
         </ScrollView>
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
             android:gravity="end"
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -141,32 +138,32 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp">
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/copyButton"
                 android:text="@string/copy"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/targetSpeakButton"
                 android:text="@string/speak"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/shareButton"
                 android:text="@string/share"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_width="@dimen/iconWidth"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
         </LinearLayout>
         <RelativeLayout
             android:id="@+id/progressLayout"
@@ -180,7 +177,7 @@
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_centerHorizontal="true"/>
         </RelativeLayout>
     </RelativeLayout>

@@ -363,7 +363,8 @@ public class MainActivity extends Activity {
         ArrayList<TranslatorLang> langList = new ArrayList<TranslatorLang>(langMap.values());
 
         Collections.sort(langList, new Comparator<TranslatorLang>() {
-            @Override public int compare(TranslatorLang lang1, TranslatorLang lang2) {
+            @Override
+            public int compare(TranslatorLang lang1, TranslatorLang lang2) {
                 return lang1.name.compareTo(lang2.name);
             }
         });
