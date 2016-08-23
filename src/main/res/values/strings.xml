@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="copy">&#xe805;</string>
-    <string name="swap">&#xe807;</string>
-    <string name="retry">&#xe806;</string>
-    <string name="clear">&#xe804;</string>
-    <string name="share">&#xe803;</string>
-    <string name="speak">&#xe801;</string>
-    <string name="pause">&#xe800;</string>
-    <string name="listen">&#xe802;</string>
+    <string name="iconCopy">&#xe801;</string>
+    <string name="iconSwap">&#xe806;</string>
+    <string name="iconRetry">&#xe804;</string>
+    <string name="iconClear">&#xe800;</string>
+    <string name="iconShare">&#xe803;</string>
+    <string name="iconSpeak">&#xe807;</string>
+    <string name="iconPaste">&#xe805;</string>
+    <string name="iconPause">&#xe808;</string>
+    <string name="iconListen">&#xe802;</string>
+
     <string name="appName">TinyTranslator</string>
-    <string name="copyMessage">Translation copied to clipboard</string>
+    <string name="messageCopy">Translation copied to clipboard</string>
     <string name="placeholder">Type text here</string>
-    <string name="errorMessage">Request failed</string>
+    <string name="messageError">Request failed</string>
+    <string name="messagePaste">Text pasted from clipboard</string>
+    <string name="messagePasteEmpty">Clipboard is empty or not valid</string>
 </resources>

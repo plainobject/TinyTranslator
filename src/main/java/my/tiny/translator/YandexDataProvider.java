@@ -13,8 +13,8 @@ public class YandexDataProvider implements DataProvider {
     static {
         langs = new HashMap<String, String>();
         langs.put("de", "German");
-        langs.put("es", "Spanish");
         langs.put("en", "English");
+        langs.put("es", "Spanish");
         langs.put("fr", "French");
         langs.put("it", "Italian");
         langs.put("ru", "Russian");

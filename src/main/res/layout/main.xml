@@ -21,7 +21,7 @@
             android:layout_centerVertical="true"/>
         <Button
             android:id="@+id/swapButton"
-            android:text="@string/swap"
+            android:text="@string/iconSwap"
             android:textSize="@dimen/iconSize"
             android:textColor="@android:color/white"
             android:background="?android:attr/selectableItemBackground"
@@ -61,7 +61,7 @@
             android:layout_height="48dp">
             <Button
                 android:id="@+id/retryButton"
-                android:text="@string/retry"
+                android:text="@string/iconRetry"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -70,7 +70,7 @@
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/sourceSpeakButton"
-                android:text="@string/speak"
+                android:text="@string/iconSpeak"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -79,7 +79,16 @@
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/clearButton"
-                android:text="@string/clear"
+                android:text="@string/iconClear"
+                android:textSize="@dimen/iconSize"
+                android:textColor="@color/main"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_width="@dimen/iconWidth"
+                android:layout_height="match_parent"/>
+            <Button
+                android:id="@+id/pasteButton"
+                android:text="@string/iconPaste"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -88,7 +97,7 @@
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/recognizeButton"
-                android:text="@string/listen"
+                android:text="@string/iconListen"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -139,7 +148,7 @@
             android:layout_marginRight="16dp">
             <Button
                 android:id="@+id/copyButton"
-                android:text="@string/copy"
+                android:text="@string/iconCopy"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -148,7 +157,7 @@
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/targetSpeakButton"
-                android:text="@string/speak"
+                android:text="@string/iconSpeak"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"
@@ -157,7 +166,7 @@
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/shareButton"
-                android:text="@string/share"
+                android:text="@string/iconShare"
                 android:textSize="@dimen/iconSize"
                 android:textColor="@color/main"
                 android:visibility="gone"

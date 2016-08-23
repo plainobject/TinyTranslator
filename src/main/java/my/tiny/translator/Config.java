@@ -3,7 +3,7 @@ package my.tiny.translator;
 public final class Config {
     private Config() {}
 
-    public static int SPLASH_DELAY = 750;
+    public static int SPLASH_DELAY = 500;
     public static int PROGRESS_DELAY = 250;
     public static int PROGRESS_FADE_DURATION = 200;
     public static String ICONFONT_FILENAME = "icons.ttf";

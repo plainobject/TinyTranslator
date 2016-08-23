@@ -20,8 +20,6 @@ import android.animation.AnimatorListenerAdapter;
 public final class Utils {
     private Utils() {}
 
-    public static int STATUS_OK = 200;
-
     public static Pattern TOKENS_PATTERN = Pattern.compile("\\s+");
 
     public static Pattern NORMALIZE_PATTERN = Pattern.compile("[^\\S\\n]+");
@@ -66,7 +64,7 @@ public final class Utils {
             urlConnection.setConnectTimeout(timeout);
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
-            if (responseCode == STATUS_OK) {
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 inputStream = urlConnection.getInputStream();
                 String result = convertInputStreamToString(inputStream);
                 return result;

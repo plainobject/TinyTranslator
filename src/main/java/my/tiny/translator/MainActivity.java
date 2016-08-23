@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
         initCopy();
         initSwap();
         initClear();
+        initPaste();
         initShare();
         initSpeakers();
         initSpinners();
@@ -93,7 +94,7 @@ public class MainActivity extends Activity {
     }
 
     public void copyText(String text) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(ClipData.newPlainText("", text));
     }
 
@@ -103,6 +104,19 @@ public class MainActivity extends Activity {
         intent.putExtra(Intent.EXTRA_TEXT, text);
         intent.setType(MIMETYPE_TEXT_PLAIN);
         startActivity(intent);
+    }
+
+    public boolean pasteText() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard.hasPrimaryClip()) {
+            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+            String text = item.coerceToText(getApplicationContext()).toString();
+            if (!text.isEmpty()) {
+                mainModel.setProperty("text", text);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void showToast(String text) {
@@ -173,7 +187,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 copyText(mainModel.getProperty("translation"));
-                showToast(getString(R.string.copyMessage));
+                showToast(getString(R.string.messageCopy));
             }
         });
     }
@@ -244,6 +258,37 @@ public class MainActivity extends Activity {
         });
     }
 
+    public void initPaste() {
+        final Button pasteButton = (Button) findViewById(R.id.pasteButton);
+        mainModel.addListener(new EventListener() {
+            @Override
+            public void handleEvent(Event event) {
+                if (event.type.equals("change")) {
+                    switch (event.data.get("name")) {
+                        case "text":
+                            pasteButton.setVisibility(
+                                event.data.get("value").isEmpty() ? View.VISIBLE : View.GONE
+                            );
+                            break;
+                    }
+                }
+            }
+        });
+        pasteButton.setTypeface(iconFont);
+        pasteButton.setVisibility(
+            mainModel.getProperty("text").isEmpty() ? View.VISIBLE : View.GONE
+        );
+        pasteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToast(getString(pasteText() ?
+                    R.string.messagePaste :
+                    R.string.messagePasteEmpty
+                ));
+            }
+        });
+    }
+
     public void initSpeakers() {
         final Button sourceSpeakButton = (Button) findViewById(R.id.sourceSpeakButton);
         final Button targetSpeakButton = (Button) findViewById(R.id.targetSpeakButton);
@@ -295,7 +340,7 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 sourceSpeakButton.setText(
-                                    getString(R.string.speak)
+                                    getString(R.string.iconSpeak)
                                 );
                             }
                         });
@@ -306,7 +351,7 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 sourceSpeakButton.setText(
-                                    getString(R.string.pause)
+                                    getString(R.string.iconPause)
                                 );
                             }
                         });
@@ -324,7 +369,7 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 targetSpeakButton.setText(
-                                    getString(R.string.speak)
+                                    getString(R.string.iconSpeak)
                                 );
                             }
                         });
@@ -335,7 +380,7 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 targetSpeakButton.setText(
-                                    getString(R.string.pause)
+                                    getString(R.string.iconPause)
                                 );
                             }
                         });
@@ -594,7 +639,7 @@ public class MainActivity extends Activity {
                         retryButton.setVisibility(View.VISIBLE);
                         progressDebouncer.cancel();
                         Utils.fadeOutView(progressLayout, Config.PROGRESS_FADE_DURATION);
-                        showToast(getString(R.string.errorMessage));
+                        showToast(getString(R.string.messageError));
                         break;
 
                     case "change":
