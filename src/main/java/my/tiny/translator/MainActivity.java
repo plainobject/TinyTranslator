@@ -30,6 +30,7 @@ import android.graphics.Typeface;
 
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
+import my.tiny.translator.core.Routine;
 import my.tiny.translator.core.Debouncer;
 import my.tiny.translator.core.EventListener;
 
@@ -60,6 +61,12 @@ public class MainActivity extends Activity {
         requestRecognizerLangs();
 
         onNewIntent(getIntent());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mainModel.dispatchEvent(new Event("pause"));
     }
 
     @Override
@@ -300,6 +307,11 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
+                if (event.type.equals("pause")) {
+                    sourceSpeakerPresenter.stop();
+                    targetSpeakerPresenter.stop();
+                    return;
+                }
                 if (event.type.equals("change")) {
                     String value = event.data.get("value");
                     switch (event.data.get("name")) {
@@ -550,8 +562,15 @@ public class MainActivity extends Activity {
 
     public void initRecognizer() {
         final Button recognizeButton = (Button) findViewById(R.id.recognizeButton);
-        boolean visible = mainModel.getProperty("text").isEmpty() &&
-                          recognizerLangs.contains(mainModel.getProperty("sourceLang"));
+        final Routine recognizerRoutine = new Routine() {
+            @Override
+            public void call() {
+                boolean visible =
+                    mainModel.getProperty("text").isEmpty() &&
+                    recognizerLangs.contains(mainModel.getProperty("sourceLang"));
+                recognizeButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+            }
+        };
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
@@ -559,22 +578,20 @@ public class MainActivity extends Activity {
                     switch (event.data.get("name")) {
                         case "text":
                         case "sourceLang":
-                            boolean visible = mainModel.getProperty("text").isEmpty() &&
-                                              recognizerLangs.contains(mainModel.getProperty("sourceLang"));
-                            recognizeButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+                            recognizerRoutine.call();
                             break;
                     }
                 }
             }
         });
         recognizeButton.setTypeface(iconFont);
-        recognizeButton.setVisibility(visible ? View.VISIBLE : View.GONE);
         recognizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 recognizeSpeech(mainModel.getProperty("sourceLang"));
             }
         });
+        recognizerRoutine.call();
     }
 
     public void initTranslator() {

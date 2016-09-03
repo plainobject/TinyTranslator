@@ -19,6 +19,13 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
         model.addListener(this);
     }
 
+    public void stop() {
+        SpeakerModel model = getModel();
+        if (model.isSpeaking()) {
+            model.stop();
+        }
+    }
+
     public void toggle() {
         SpeakerModel model = getModel();
         if (model.isSpeaking()) {
