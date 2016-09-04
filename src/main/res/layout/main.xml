@@ -15,6 +15,7 @@
             android:id="@+id/sourceLang"
             android:gravity="end"
             android:background="@android:color/transparent"
+            android:spinnerMode="dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/swapButton"
@@ -31,6 +32,7 @@
         <Spinner
             android:id="@+id/targetLang"
             android:background="@android:color/transparent"
+            android:spinnerMode="dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/swapButton"

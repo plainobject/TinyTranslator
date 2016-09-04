@@ -11,7 +11,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.style.MetricAffectingSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.ParagraphStyle;
 import android.widget.Toast;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -515,12 +516,14 @@ public class MainActivity extends Activity {
                 mainModel.setProperty("text", s.toString());
                 if (count > 1) {
                     Editable text = textarea.getText();
-                    MetricAffectingSpan[] spans = text.getSpans(
-                        0, text.length(),
-                        MetricAffectingSpan.class
+                    Object[] spans = text.getSpans(
+                        0, text.length(), Object.class
                     );
-                    for (MetricAffectingSpan span : spans) {
-                        text.removeSpan(span);
+                    for (Object span : spans) {
+                        if (span instanceof CharacterStyle ||
+                            span instanceof ParagraphStyle) {
+                            text.removeSpan(span);
+                        }
                     }
                 }
             }
