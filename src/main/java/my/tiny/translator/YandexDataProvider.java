@@ -3,12 +3,14 @@ package my.tiny.translator;
 import org.json.JSONObject;
 import java.util.HashMap;
 
+import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
 
 public class YandexDataProvider implements DataProvider {
     protected String url;
     protected String key;
 
+    public static final int REQUEST_TIMEOUT = 10000;
     public static final HashMap<String, String> langs;
     static {
         langs = new HashMap<String, String>();
@@ -26,7 +28,7 @@ public class YandexDataProvider implements DataProvider {
     }
 
     public int getTextLimit() {
-        return 1500;
+        return 5000;
     }
 
     public String parseResponse(String response) {
@@ -38,12 +40,13 @@ public class YandexDataProvider implements DataProvider {
         }
     }
 
-    public String generateUrl(String text, String sourceLang, String targetLang) {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("key", key);
-        params.put("text", text);
-        params.put("lang", sourceLang + "-" + targetLang);
-        return url + "?" + Utils.convertMapToQueryString(params);
+    public HTTPRequest createRequest(String text, String sourceLang, String targetLang) {
+        HTTPRequest request = new HTTPRequest(url);
+        request.setTimeout(REQUEST_TIMEOUT);
+        request.addUrlParam("key", key);
+        request.addBodyParam("text", text);
+        request.addBodyParam("lang", sourceLang + "-" + targetLang);
+        return request;
     }
 
     public boolean isLanguageSupported(String lang) {

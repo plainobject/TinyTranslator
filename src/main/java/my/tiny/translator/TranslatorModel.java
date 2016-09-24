@@ -5,21 +5,19 @@ import android.os.AsyncTask;
 
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
+import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
+import my.tiny.translator.core.HTTPResponse;
 
 public class TranslatorModel extends Model {
     protected DataProvider dataProvider;
-    protected TranslateTask translateTask = null;
-    private static final int REQUEST_TIMEOUT = 10000;
+    protected TranslateTask translateTask;
 
-    private class TranslateTask extends AsyncTask<String, Void, String> {
+    private class TranslateTask extends AsyncTask<HTTPRequest, Void, String> {
         @Override
-        protected String doInBackground(String... urls) {
-            try {
-                return Utils.downloadUrl(urls[0], REQUEST_TIMEOUT);
-            } catch (Exception exception) {
-                return null;
-            }
+        protected String doInBackground(HTTPRequest... requests) {
+            HTTPResponse response = requests[0].send();
+            return (response.isOK()) ? response.text : null;
         }
 
         @Override
@@ -65,7 +63,7 @@ public class TranslatorModel extends Model {
         }
         dispatchEvent(new Event("query"));
         translateTask = new TranslateTask();
-        translateTask.execute(dataProvider.generateUrl(
+        translateTask.execute(dataProvider.createRequest(
             getProperty("text"),
             getProperty("sourceLang"),
             getProperty("targetLang")

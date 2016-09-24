@@ -1,14 +1,5 @@
 package my.tiny.translator;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.net.HttpURLConnection;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Locale;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -52,35 +43,6 @@ public final class Utils {
             });
     }
 
-    public static String downloadUrl(String urlString, int timeout) throws IOException {
-        InputStream inputStream = null;
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(urlString);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setDoInput(true);
-            urlConnection.setReadTimeout(timeout);
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setConnectTimeout(timeout);
-            urlConnection.connect();
-            int responseCode = urlConnection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                inputStream = urlConnection.getInputStream();
-                String result = convertInputStreamToString(inputStream);
-                return result;
-            } else {
-                throw new IOException(urlConnection.getResponseMessage());
-            }
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
     public static String normalizeText(String text) {
         return NORMALIZE_PATTERN.matcher(text).replaceAll(" ").trim();
     }
@@ -115,44 +77,6 @@ public final class Utils {
             result.append(separator);
             result.append(value.toString());
         }
-        return result.toString().substring(separator.length());
-    }
-
-    public static String encodeURIComponent(String component) {
-        try {
-            return URLEncoder.encode(component, "UTF-8");
-        } catch (Exception exception) {
-            return component;
-        }
-    }
-
-    public static String convertMapToQueryString(Map<String, String> map) {
-        StringBuilder result = new StringBuilder();
-
-        for (Entry<String, String> entry : map.entrySet()) {
-            if (result.length() > 0) {
-                result.append("&");
-            }
-            result.append(encodeURIComponent(entry.getKey()));
-            result.append("=");
-            result.append(encodeURIComponent(entry.getValue()));
-        }
-
-        return result.toString();
-    }
-
-    public static String convertInputStreamToString(InputStream inputStream) {
-        try {
-            String line;
-            StringBuilder result = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
-            reader.close();
-            return result.toString();
-        } catch (Exception exception) {
-            return "";
-        }
+        return result.substring(separator.length());
     }
 }
