@@ -15,7 +15,7 @@ public class EventDispatcher {
 
     public void dispatchEvent(Event event) {
         for (EventListener listener : listeners) {
-            listener.handleEvent(event);
+            listener.handleEvent(event.clone());
         }
     }
 }

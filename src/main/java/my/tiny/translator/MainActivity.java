@@ -181,9 +181,9 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "translation":
-                            copyButton.setVisibility(event.data.get("value").isEmpty() ? View.GONE : View.VISIBLE);
+                            copyButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
@@ -224,9 +224,9 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "text":
-                            clearButton.setVisibility(event.data.get("value").isEmpty() ? View.GONE : View.VISIBLE);
+                            clearButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
@@ -248,9 +248,9 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "translation":
-                            shareButton.setVisibility(event.data.get("value").isEmpty() ? View.GONE : View.VISIBLE);
+                            shareButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
@@ -272,10 +272,10 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "text":
                             pasteButton.setVisibility(
-                                event.data.get("value").isEmpty() ? View.VISIBLE : View.GONE
+                                event.getDataValue("value").isEmpty() ? View.VISIBLE : View.GONE
                             );
                             break;
                     }
@@ -314,8 +314,8 @@ public class MainActivity extends Activity {
                     return;
                 }
                 if (event.type.equals("change")) {
-                    String value = event.data.get("value");
-                    switch (event.data.get("name")) {
+                    String value = event.getDataValue("value");
+                    switch (event.getDataValue("name")) {
                         case "text":
                             sourceSpeakerPresenter.setText(value);
                             break;
@@ -443,8 +443,8 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    String value = event.data.get("value");
-                    switch (event.data.get("name")) {
+                    String value = event.getDataValue("value");
+                    switch (event.getDataValue("name")) {
                         case "sourceLang":
                             setSetting("sourceLang", value);
                             sourceSpinner.setSelection(
@@ -453,7 +453,7 @@ public class MainActivity extends Activity {
                             TranslatorLang targetSelectedItem = (TranslatorLang) targetSpinner.getSelectedItem();
                             if (value.equals(targetSelectedItem.code)) {
                                 targetSpinner.setSelection(
-                                    targetAdapter.getPosition(langMap.get(event.data.get("oldValue")))
+                                    targetAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
                                 );
                             }
                             break;
@@ -466,7 +466,7 @@ public class MainActivity extends Activity {
                             TranslatorLang sourceSelectedItem = (TranslatorLang) sourceSpinner.getSelectedItem();
                             if (value.equals(sourceSelectedItem.code)) {
                                 sourceSpinner.setSelection(
-                                    sourceAdapter.getPosition(langMap.get(event.data.get("oldValue")))
+                                    sourceAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
                                 );
                             }
                             break;
@@ -544,9 +544,9 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "text":
-                            String value = event.data.get("value");
+                            String value = event.getDataValue("value");
                             if (textarea.getText().toString().equals(value)) {
                                 break;
                             }
@@ -578,7 +578,7 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 if (event.type.equals("change")) {
-                    switch (event.data.get("name")) {
+                    switch (event.getDataValue("name")) {
                         case "text":
                         case "sourceLang":
                             recognizerRoutine.call();
@@ -623,8 +623,8 @@ public class MainActivity extends Activity {
                 }
 
                 if (event.type.equals("change")) {
-                    String value = event.data.get("value");
-                    switch (event.data.get("name")) {
+                    String value = event.getDataValue("value");
+                    switch (event.getDataValue("name")) {
                         case "text":
                             translatorPresenter.setText(value);
                             break;
@@ -663,7 +663,7 @@ public class MainActivity extends Activity {
                         break;
 
                     case "change":
-                        mainModel.setProperty("translation", event.data.get("translation"));
+                        mainModel.setProperty("translation", event.getDataValue("translation"));
                         break;
 
                     case "update":
@@ -699,8 +699,8 @@ public class MainActivity extends Activity {
                 }
 
                 if (event.type.equals("change")) {
-                    String value = event.data.get("value");
-                    switch (event.data.get("name")) {
+                    String value = event.getDataValue("value");
+                    switch (event.getDataValue("name")) {
                         case "text":
                             dictionaryPresenter.setText(value);
                             break;

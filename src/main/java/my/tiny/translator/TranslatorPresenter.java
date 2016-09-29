@@ -1,6 +1,5 @@
 package my.tiny.translator;
 
-import java.util.HashMap;
 import android.view.View;
 import android.widget.TextView;
 
@@ -53,8 +52,8 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
         }
 
         if (event.type.equals("change")) {
-            String name = event.data.get("name");
-            String value = event.data.get("value");
+            String name = event.getDataValue("name");
+            String value = event.getDataValue("value");
             switch (name) {
                 case "text":
                 case "sourceLang":
@@ -73,9 +72,9 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                 case "translation":
                     getView().setText(value);
                     getView().setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);
-                    HashMap<String, String> eventData = new HashMap<String, String>();
-                    eventData.put("translation", value);
-                    dispatchEvent(new Event("change", eventData));
+                    Event innerEvent = new Event("change");
+                    innerEvent.setDataValue("translation", value);
+                    dispatchEvent(innerEvent);
                     break;
             }
         }

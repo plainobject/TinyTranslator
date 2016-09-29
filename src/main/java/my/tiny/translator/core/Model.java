@@ -15,11 +15,11 @@ public class Model extends EventDispatcher {
             return;
         }
         props.put(name, value);
-        HashMap<String, String> eventData = new HashMap<String, String>();
-        eventData.put("name", name);
-        eventData.put("value", value);
-        eventData.put("oldValue", oldValue);
-        dispatchEvent(new Event("change", eventData));
+        Event event = new Event("change");
+        event.setDataValue("name", name);
+        event.setDataValue("value", value);
+        event.setDataValue("oldValue", oldValue);
+        dispatchEvent(event);
     }
 
     public String getProperty(String name) {

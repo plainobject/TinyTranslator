@@ -11,7 +11,6 @@ import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.StringBuilder;
-import java.lang.IllegalArgumentException;
 
 public class HTTPRequest {
     public static final String CHARSET = "UTF-8";
@@ -46,11 +45,15 @@ public class HTTPRequest {
     }
 
     public void setUrlParams(Map<String, String> params) {
-        urlParams.putAll(params);
+        if (params != null) {
+            urlParams.putAll(params);
+        }
     }
 
     public void setBodyParams(Map<String, String> params) {
-        bodyParams.putAll(params);
+        if (params != null) {
+            bodyParams.putAll(params);
+        }
     }
 
     public HTTPResponse send() {
