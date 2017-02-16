@@ -47,7 +47,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        iconFont = Typeface.createFromAsset(getAssets(), Config.ICONFONT_FILENAME);
+        iconFont = Typeface.createFromAsset(
+            getAssets(),
+            Config.ICONFONT_FILENAME
+        );
 
         initCopy();
         initSwap();
@@ -62,6 +65,10 @@ public class MainActivity extends Activity {
         requestRecognizerLangs();
 
         onNewIntent(getIntent());
+
+        if (mainModel.getProperty("text").isEmpty()) {
+            mainModel.dispatchEvent(new Event("focus"));
+        }
     }
 
     @Override
@@ -143,14 +150,20 @@ public class MainActivity extends Activity {
         if (shown) {
             imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
         } else {
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            imm.hideSoftInputFromWindow(
+                editText.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS
+            );
         }
     }
 
     public void recognizeSpeech(String lang) {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        );
         startActivityForResult(intent, SPEECH_RECOGNITION_CODE);
     }
 
@@ -238,6 +251,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 mainModel.setProperty("text", "");
+                mainModel.dispatchEvent(new Event("focus"));
             }
         });
     }
@@ -543,6 +557,11 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
+                if (event.type.equals("focus")) {
+                    textarea.requestFocus();
+                    toggleKeyboard(textarea, true);
+                    return;
+                }
                 if (event.type.equals("change")) {
                     switch (event.getDataValue("name")) {
                         case "text":
@@ -551,10 +570,6 @@ public class MainActivity extends Activity {
                                 break;
                             }
                             textarea.setText(value);
-                            if (value.isEmpty()) {
-                                textarea.requestFocus();
-                                toggleKeyboard(textarea, true);
-                            }
                             textarea.setSelection(value.length());
                             break;
                     }

@@ -14,12 +14,11 @@
         <Spinner
             android:id="@+id/sourceLang"
             android:gravity="end"
-            android:background="@android:color/transparent"
+            android:background="?android:attr/selectableItemBackground"
             android:spinnerMode="dialog"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/swapButton"
-            android:layout_centerVertical="true"/>
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/swapButton"/>
         <Button
             android:id="@+id/swapButton"
             android:text="@string/iconSwap"
@@ -31,12 +30,11 @@
             android:layout_centerInParent="true"/>
         <Spinner
             android:id="@+id/targetLang"
-            android:background="@android:color/transparent"
+            android:background="?android:attr/selectableItemBackground"
             android:spinnerMode="dialog"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/swapButton"
-            android:layout_centerVertical="true"/>
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/swapButton"/>
     </RelativeLayout>
     <LinearLayout
         android:paddingTop="16dp"
@@ -53,9 +51,7 @@
             android:maxLines="5"
             android:inputType="textMultiLine|textNoSuggestions"
             android:scrollbars="vertical"
-            android:background="@drawable/textbox">
-                <requestFocus/>
-        </EditText>
+            android:background="@drawable/textbox"/>
         <LinearLayout
             android:gravity="end"
             android:orientation="horizontal"
