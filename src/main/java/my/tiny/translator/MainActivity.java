@@ -465,7 +465,7 @@ public class MainActivity extends Activity {
                                 sourceAdapter.getPosition(langMap.get(value))
                             );
                             TranslatorLang targetSelectedItem = (TranslatorLang) targetSpinner.getSelectedItem();
-                            if (value.equals(targetSelectedItem.code)) {
+                            if (targetSelectedItem != null && value.equals(targetSelectedItem.code)) {
                                 targetSpinner.setSelection(
                                     targetAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
                                 );
@@ -478,7 +478,7 @@ public class MainActivity extends Activity {
                                 targetAdapter.getPosition(langMap.get(value))
                             );
                             TranslatorLang sourceSelectedItem = (TranslatorLang) sourceSpinner.getSelectedItem();
-                            if (value.equals(sourceSelectedItem.code)) {
+                            if (sourceSelectedItem != null && value.equals(sourceSelectedItem.code)) {
                                 sourceSpinner.setSelection(
                                     sourceAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
                                 );
@@ -490,15 +490,21 @@ public class MainActivity extends Activity {
         });
 
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        String startSourceLang = settings.getString("sourceLang", Config.TRANSLATOR_DEFAULT_SOURCELANG);
-        String startTargetLang = settings.getString("targetLang", Config.TRANSLATOR_DEFAULT_TARGETLANG);
+        String sourceStartLang = settings.getString("sourceLang", Config.TRANSLATOR_DEFAULT_SOURCELANG);
+        String targetStartLang = settings.getString("targetLang", Config.TRANSLATOR_DEFAULT_TARGETLANG);
 
-        sourceSpinner.setSelection(
-            sourceAdapter.getPosition(langMap.get(startSourceLang))
-        );
-        targetSpinner.setSelection(
-            targetAdapter.getPosition(langMap.get(startTargetLang))
-        );
+        TranslatorLang sourceStartItem = langMap.get(sourceStartLang);
+        TranslatorLang targetStartItem = langMap.get(targetStartLang);
+        if (sourceStartItem != null) {
+            sourceSpinner.setSelection(
+                sourceAdapter.getPosition(sourceStartItem)
+            );
+        }
+        if (targetStartItem != null) {
+            targetSpinner.setSelection(
+                targetAdapter.getPosition(targetStartItem)
+            );
+        }
 
         sourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -616,6 +622,7 @@ public class MainActivity extends Activity {
         final Button retryButton = (Button) findViewById(R.id.retryButton);
         final View progressLayout = (View) findViewById(R.id.progressLayout);
         final Debouncer progressDebouncer = new Debouncer(Config.PROGRESS_DELAY, new Runnable() {
+            @Override
             public void run() {
                 Utils.fadeInView(progressLayout, Config.PROGRESS_FADE_DURATION);
             }

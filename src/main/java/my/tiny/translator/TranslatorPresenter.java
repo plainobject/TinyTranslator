@@ -16,6 +16,7 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
         super(view, model);
         model.addListener(this);
         requestDebouncer = new Debouncer(REQUEST_DELAY, new Runnable() {
+            @Override
             public void run() {
                 getModel().requestTranslation();
             }

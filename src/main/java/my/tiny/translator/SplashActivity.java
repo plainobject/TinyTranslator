@@ -2,20 +2,19 @@ package my.tiny.translator;
 
 import java.lang.Runnable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
 import android.content.Intent;
 
+import my.tiny.translator.core.Debouncer;
+
 public class SplashActivity extends Activity {
-    private Handler handler;
-    private Runnable runnable;
+    private Debouncer startDebouncer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        handler = new Handler();
-        runnable = new Runnable() {
+        startDebouncer = new Debouncer(Config.SPLASH_DELAY, new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
@@ -26,30 +25,30 @@ public class SplashActivity extends Activity {
                     android.R.anim.fade_out
                 );
             }
-        };
+        });
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (handler != null && runnable != null) {
-            handler.removeCallbacks(runnable);
+        if (startDebouncer != null) {
+            startDebouncer.cancel();
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (handler != null && runnable != null) {
-            handler.postDelayed(runnable, Config.SPLASH_DELAY);
+        if (startDebouncer != null) {
+            startDebouncer.start();
         }
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (handler != null && runnable != null) {
-            handler.removeCallbacks(runnable);
+        if (startDebouncer != null) {
+            startDebouncer.cancel();
         }
     }
 }
