@@ -1,8 +1,8 @@
 package my.tiny.translator.core;
 
 public class HTTPResponse {
-    public int code;
-    public String text;
+    public final int code;
+    public final String text;
     public static final int CODE_OK = 200;
 
     public HTTPResponse(int code, String text) {

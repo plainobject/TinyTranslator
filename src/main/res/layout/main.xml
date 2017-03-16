@@ -56,7 +56,7 @@
             android:gravity="end"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="48dp">
+            android:layout_height="@dimen/iconDimen">
             <Button
                 android:id="@+id/retryButton"
                 android:text="@string/iconRetry"
@@ -64,7 +64,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/sourceSpeakButton"
@@ -73,7 +73,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/clearButton"
@@ -82,16 +82,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
-                android:layout_height="match_parent"/>
-            <Button
-                android:id="@+id/pasteButton"
-                android:text="@string/iconPaste"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/recognizeButton"
@@ -100,7 +91,16 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
+                android:layout_height="match_parent"/>
+            <Button
+                android:id="@+id/pasteButton"
+                android:text="@string/iconPaste"
+                android:textSize="@dimen/iconSize"
+                android:textColor="@color/main"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
         </LinearLayout>
     </LinearLayout>
@@ -140,7 +140,7 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_below="@+id/translationWrapper"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/iconDimen"
             android:layout_marginTop="-64dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp">
@@ -151,7 +151,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/targetSpeakButton"
@@ -160,7 +160,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
             <Button
                 android:id="@+id/shareButton"
@@ -169,7 +169,7 @@
                 android:textColor="@color/main"
                 android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconWidth"
+                android:layout_width="@dimen/iconDimen"
                 android:layout_height="match_parent"/>
         </LinearLayout>
         <RelativeLayout

@@ -1,6 +1,5 @@
 package my.tiny.translator.core;
 
-import java.lang.Runnable;
 import android.os.Handler;
 
 public class Debouncer {

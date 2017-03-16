@@ -2,6 +2,6 @@
 <resources>
     <dimen name="textSize">18sp</dimen>
     <dimen name="iconSize">24sp</dimen>
-    <dimen name="iconWidth">48dp</dimen>
+    <dimen name="iconDimen">48dp</dimen>
     <dimen name="toolbarHeight">56dp</dimen>
 </resources>

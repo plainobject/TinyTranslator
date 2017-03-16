@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Event {
     public final String type;
-    protected HashMap<String, String> data = new HashMap<String, String>();
+    protected HashMap<String, String> data = new HashMap<>();
 
     public Event(String type) {
         this(type, null);

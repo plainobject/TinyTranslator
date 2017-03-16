@@ -3,7 +3,6 @@ package my.tiny.translator;
 import java.util.Locale;
 import java.util.Collection;
 import java.util.regex.Pattern;
-import java.lang.StringBuilder;
 import android.view.View;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -11,9 +10,9 @@ import android.animation.AnimatorListenerAdapter;
 public final class Utils {
     private Utils() {}
 
-    public static Pattern TOKENS_PATTERN = Pattern.compile("\\s+");
+    public static final Pattern TOKENS_PATTERN = Pattern.compile("\\s+");
 
-    public static Pattern NORMALIZE_PATTERN = Pattern.compile("[^\\S\\n]+");
+    public static final Pattern NORMALIZE_PATTERN = Pattern.compile("[^\\S\\n]+");
 
     public static void fadeInView(View view, long duration) {
         if (view.getVisibility() == View.VISIBLE) {

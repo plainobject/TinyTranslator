@@ -1,6 +1,5 @@
 package my.tiny.translator;
 
-import java.lang.Runnable;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -9,12 +8,13 @@ import my.tiny.translator.core.Debouncer;
 
 public class SplashActivity extends Activity {
     private Debouncer startDebouncer;
+    private static final int SPLASH_DELAY = 500;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        startDebouncer = new Debouncer(Config.SPLASH_DELAY, new Runnable() {
+        startDebouncer = new Debouncer(SPLASH_DELAY, new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);

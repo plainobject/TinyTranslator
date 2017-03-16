@@ -1,7 +1,9 @@
 package my.tiny.translator;
 
 import org.json.JSONObject;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
@@ -11,15 +13,16 @@ public class YandexDataProvider implements DataProvider {
     protected String key;
 
     public static final int REQUEST_TIMEOUT = 10000;
-    public static final HashMap<String, String> langs;
+    public static final Map<String, String> langs;
     static {
-        langs = new HashMap<String, String>();
-        langs.put("de", "German");
-        langs.put("en", "English");
-        langs.put("es", "Spanish");
-        langs.put("fr", "French");
-        langs.put("it", "Italian");
-        langs.put("ru", "Russian");
+        Map<String, String> hashMap = new HashMap<>();
+        hashMap.put("de", "German");
+        hashMap.put("en", "English");
+        hashMap.put("es", "Spanish");
+        hashMap.put("fr", "French");
+        hashMap.put("it", "Italian");
+        hashMap.put("ru", "Russian");
+        langs = Collections.unmodifiableMap(hashMap);
     }
 
     public YandexDataProvider(String url, String key) {

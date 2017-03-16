@@ -11,9 +11,9 @@
     <string name="iconListen">&#xe802;</string>
 
     <string name="appName">TinyTranslator</string>
-    <string name="messageCopy">Translation copied to clipboard</string>
-    <string name="placeholder">Type text here</string>
-    <string name="messageError">Request failed</string>
-    <string name="messagePaste">Text pasted from clipboard</string>
-    <string name="messagePasteEmpty">Clipboard is empty or not valid</string>
+    <string name="messageCopy">Translation has been copied to the clipboard</string>
+    <string name="placeholder">Type here to translate</string>
+    <string name="messageError">Request has failed</string>
+    <string name="messagePaste">Text has been pasted from the clipboard</string>
+    <string name="messagePasteEmpty">Clipboard data is empty or invalid</string>
 </resources>

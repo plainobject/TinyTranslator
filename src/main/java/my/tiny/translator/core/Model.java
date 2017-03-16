@@ -3,7 +3,7 @@ package my.tiny.translator.core;
 import java.util.HashMap;
 
 public class Model extends EventDispatcher {
-    private HashMap<String, String> props = new HashMap<String, String>();
+    private HashMap<String, String> props = new HashMap<>();
 
     public boolean isValid() {
         return true;

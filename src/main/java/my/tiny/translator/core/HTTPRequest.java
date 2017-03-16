@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.HashMap;
-import java.lang.StringBuilder;
 
 public class HTTPRequest {
     public static final String CHARSET = "UTF-8";
@@ -22,8 +21,8 @@ public class HTTPRequest {
 
     protected int timeout = 0;
     protected String url;
-    protected HashMap<String, String> urlParams = new HashMap<String, String>();
-    protected HashMap<String, String> bodyParams = new HashMap<String, String>();
+    protected HashMap<String, String> urlParams = new HashMap<>();
+    protected HashMap<String, String> bodyParams = new HashMap<>();
 
     public HTTPRequest(String url) {
         if (url == null) {

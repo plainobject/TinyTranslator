@@ -3,7 +3,7 @@ package my.tiny.translator.core;
 import java.util.ArrayList;
 
 public class EventDispatcher {
-    private ArrayList<EventListener> listeners = new ArrayList<EventListener>();
+    private ArrayList<EventListener> listeners = new ArrayList<>();
 
     public void addListener(EventListener listener) {
         listeners.add(listener);

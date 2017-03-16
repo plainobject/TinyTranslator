@@ -36,10 +36,19 @@ import my.tiny.translator.core.Debouncer;
 import my.tiny.translator.core.EventListener;
 
 public class MainActivity extends Activity {
-    private static final int SPEECH_RECOGNITION_CODE = 1;
+    private static final int PROGRESS_DELAY = 250;
+    private static final int SPEECH_RECOGNIZER_CODE = 1;
+    private static final int PROGRESS_FADE_DURATION = 200;
+    private static final String ICONFONT_FILENAME = "icons.ttf";
     private static final String MIMETYPE_TEXT_PLAIN = "text/plain";
+    private static final String DICTIONARY_APIKEY = ""; // https://tech.yandex.ru/keys/get/?service=dict
+    private static final String DICTIONARY_APIURL = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup";
+    private static final String TRANSLATOR_APIKEY = ""; // https://tech.yandex.ru/keys/get/?service=trnsl
+    private static final String TRANSLATOR_APIURL = "https://translate.yandex.net/api/v1.5/tr.json/translate";
+    private static final String TRANSLATOR_DEFAULT_SOURCELANG = "en";
+    private static final String TRANSLATOR_DEFAULT_TARGETLANG = "ru";
     private Model mainModel = new Model();
-    private ArrayList<String> recognizerLangs = new ArrayList<String>();
+    private ArrayList<String> recognizerLangs = new ArrayList<>();
     private Typeface iconFont;
 
     @Override
@@ -48,8 +57,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         iconFont = Typeface.createFromAsset(
-            getAssets(),
-            Config.ICONFONT_FILENAME
+            getAssets(), ICONFONT_FILENAME
         );
 
         initCopy();
@@ -100,7 +108,7 @@ public class MainActivity extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SPEECH_RECOGNITION_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == SPEECH_RECOGNIZER_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> list = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             String text = list.get(0);
             text = Utils.capitalizeText(text, mainModel.getProperty("sourceLang"));
@@ -164,7 +172,7 @@ public class MainActivity extends Activity {
             RecognizerIntent.EXTRA_LANGUAGE_MODEL,
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
-        startActivityForResult(intent, SPEECH_RECOGNITION_CODE);
+        startActivityForResult(intent, SPEECH_RECOGNIZER_CODE);
     }
 
     public void requestRecognizerLangs() {
@@ -426,7 +434,7 @@ public class MainActivity extends Activity {
         final Spinner sourceSpinner = (Spinner) findViewById(R.id.sourceLang);
         final Spinner targetSpinner = (Spinner) findViewById(R.id.targetLang);
 
-        final HashMap<String, TranslatorLang> langMap = new HashMap<String, TranslatorLang>();
+        final HashMap<String, TranslatorLang> langMap = new HashMap<>();
 
         for (Map.Entry<String, String> entry : YandexDataProvider.langs.entrySet()) {
             langMap.put(entry.getKey(), new TranslatorLang(entry.getKey(), entry.getValue()));
@@ -490,8 +498,8 @@ public class MainActivity extends Activity {
         });
 
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        String sourceStartLang = settings.getString("sourceLang", Config.TRANSLATOR_DEFAULT_SOURCELANG);
-        String targetStartLang = settings.getString("targetLang", Config.TRANSLATOR_DEFAULT_TARGETLANG);
+        String sourceStartLang = settings.getString("sourceLang", TRANSLATOR_DEFAULT_SOURCELANG);
+        String targetStartLang = settings.getString("targetLang", TRANSLATOR_DEFAULT_TARGETLANG);
 
         TranslatorLang sourceStartItem = langMap.get(sourceStartLang);
         TranslatorLang targetStartItem = langMap.get(targetStartLang);
@@ -621,16 +629,16 @@ public class MainActivity extends Activity {
     public void initTranslator() {
         final Button retryButton = (Button) findViewById(R.id.retryButton);
         final View progressLayout = (View) findViewById(R.id.progressLayout);
-        final Debouncer progressDebouncer = new Debouncer(Config.PROGRESS_DELAY, new Runnable() {
+        final Debouncer progressDebouncer = new Debouncer(PROGRESS_DELAY, new Runnable() {
             @Override
             public void run() {
-                Utils.fadeInView(progressLayout, Config.PROGRESS_FADE_DURATION);
+                Utils.fadeInView(progressLayout, PROGRESS_FADE_DURATION);
             }
         });
         TextView translatorView = (TextView) findViewById(R.id.translation);
         TranslatorModel translatorModel = new TranslatorModel(new YandexDataProvider(
-            Config.TRANSLATOR_APIURL,
-            Config.TRANSLATOR_APIKEY
+            TRANSLATOR_APIURL,
+            TRANSLATOR_APIKEY
         ));
         final TranslatorPresenter translatorPresenter = new TranslatorPresenter(
             translatorView,
@@ -680,7 +688,7 @@ public class MainActivity extends Activity {
                     case "error":
                         retryButton.setVisibility(View.VISIBLE);
                         progressDebouncer.cancel();
-                        Utils.fadeOutView(progressLayout, Config.PROGRESS_FADE_DURATION);
+                        Utils.fadeOutView(progressLayout, PROGRESS_FADE_DURATION);
                         showToast(getString(R.string.messageError));
                         break;
 
@@ -692,7 +700,7 @@ public class MainActivity extends Activity {
                     case "invalid":
                         retryButton.setVisibility(View.GONE);
                         progressDebouncer.cancel();
-                        Utils.fadeOutView(progressLayout, Config.PROGRESS_FADE_DURATION);
+                        Utils.fadeOutView(progressLayout, PROGRESS_FADE_DURATION);
                         break;
                 }
             }
@@ -705,8 +713,8 @@ public class MainActivity extends Activity {
     public void initDictionary() {
         TextView dictionaryView = (TextView) findViewById(R.id.dictionary);
         DictionaryModel dictionaryModel = new DictionaryModel(new YandexDictionaryProvider(
-            Config.DICTIONARY_APIURL,
-            Config.DICTIONARY_APIKEY
+            DICTIONARY_APIURL,
+            DICTIONARY_APIKEY
         ));
         final TranslatorPresenter dictionaryPresenter = new TranslatorPresenter(
             dictionaryView,

@@ -1,8 +1,8 @@
 package my.tiny.translator;
 
 public class TranslatorLang {
-    public String code;
-    public String name;
+    public final String code;
+    public final String name;
 
     public TranslatorLang(String code, String name) {
         this.code = code;

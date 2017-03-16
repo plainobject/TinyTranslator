@@ -1,7 +1,9 @@
 package my.tiny.translator;
 
+import java.util.Map;
 import java.util.Locale;
 import java.util.HashMap;
+import java.util.Collections;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -13,18 +15,19 @@ import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
 
 public class SpeakerModel extends Model {
-    private TextToSpeech tts = null;
+    private TextToSpeech tts;
     private boolean initialized = false;
     private static final String UTTERANCE_ID = "12345";
 
-    private static final HashMap<String, String> countryMap;
+    private static final Map<String, String> countryMap;
     static {
-        countryMap = new HashMap<String, String>();
-        countryMap.put("en", "GB");
-        countryMap.put("es", "ES");
-        countryMap.put("fr", "FR");
+        Map<String, String> hashMap = new HashMap<>();
+        hashMap.put("en", "GB");
+        hashMap.put("es", "ES");
+        hashMap.put("fr", "FR");
+        countryMap = Collections.unmodifiableMap(hashMap);
     }
-    
+
     public SpeakerModel(Context context) {
         tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
