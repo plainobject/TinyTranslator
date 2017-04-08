@@ -92,6 +92,10 @@ public class SpeakerModel extends Model {
         tts.speak(getProperty("text"), TextToSpeech.QUEUE_FLUSH, params, UTTERANCE_ID);
     }
 
+    public int setSpeed(float speed) {
+        return tts.setSpeechRate(speed);
+    }
+
     public void destroy() {
         tts.shutdown();
     }
