@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
 
         onNewIntent(getIntent());
 
-        if (mainModel.getProperty("text").isEmpty()) {
+        if (isEmptyText()) {
             mainModel.dispatchEvent(new Event("focus"));
         }
     }
@@ -89,6 +89,15 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         mainModel.dispatchEvent(new Event("destroy"));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isEmptyText()) {
+            super.onBackPressed();
+        } else {
+            clearText();
+        }
     }
 
     @Override
@@ -142,8 +151,17 @@ public class MainActivity extends Activity {
         return false;
     }
 
+    public boolean isEmptyText() {
+        return mainModel.getProperty("text").isEmpty();
+    }
+
     public void showToast(String text) {
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+    }
+
+    public void clearText() {
+        mainModel.setProperty("text", "");
+        mainModel.dispatchEvent(new Event("focus"));
     }
 
     public void setSetting(String name, String value) {
@@ -247,19 +265,18 @@ public class MainActivity extends Activity {
                 if (event.type.equals("change")) {
                     switch (event.getDataValue("name")) {
                         case "text":
-                            clearButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
+                            clearButton.setVisibility(isEmptyText() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
             }
         });
         clearButton.setTypeface(iconFont);
-        clearButton.setVisibility(mainModel.getProperty("text").isEmpty() ? View.GONE : View.VISIBLE);
+        clearButton.setVisibility(isEmptyText() ? View.GONE : View.VISIBLE);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainModel.setProperty("text", "");
-                mainModel.dispatchEvent(new Event("focus"));
+                clearText();
             }
         });
     }
@@ -297,7 +314,7 @@ public class MainActivity extends Activity {
                     switch (event.getDataValue("name")) {
                         case "text":
                             pasteButton.setVisibility(
-                                event.getDataValue("value").isEmpty() ? View.VISIBLE : View.GONE
+                                isEmptyText() ? View.VISIBLE : View.GONE
                             );
                             break;
                     }
@@ -306,7 +323,7 @@ public class MainActivity extends Activity {
         });
         pasteButton.setTypeface(iconFont);
         pasteButton.setVisibility(
-            mainModel.getProperty("text").isEmpty() ? View.VISIBLE : View.GONE
+            isEmptyText() ? View.VISIBLE : View.GONE
         );
         pasteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -598,7 +615,7 @@ public class MainActivity extends Activity {
             @Override
             public void call() {
                 boolean visible =
-                    mainModel.getProperty("text").isEmpty() &&
+                    isEmptyText() &&
                     recognizerLangs.contains(mainModel.getProperty("sourceLang"));
                 recognizeButton.setVisibility(visible ? View.VISIBLE : View.GONE);
             }
