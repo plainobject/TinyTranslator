@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.text.style.ParagraphStyle;
+import android.media.AudioManager;
 import android.widget.Toast;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -136,6 +137,12 @@ public class MainActivity extends Activity {
         intent.putExtra(Intent.EXTRA_TEXT, text);
         intent.setType(MIMETYPE_TEXT_PLAIN);
         startActivity(intent);
+    }
+
+    public boolean isMuted() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        return audioManager != null &&
+               audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0;
     }
 
     public boolean pasteText() {
@@ -402,6 +409,9 @@ public class MainActivity extends Activity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (isMuted()) {
+                                    showToast(getString(R.string.messageMuted));
+                                }
                                 sourceSpeakButton.setText(
                                     getString(R.string.iconPause)
                                 );
@@ -431,6 +441,9 @@ public class MainActivity extends Activity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (isMuted()) {
+                                    showToast(getString(R.string.messageMuted));
+                                }
                                 targetSpeakButton.setText(
                                     getString(R.string.iconPause)
                                 );
