@@ -9,10 +9,9 @@ import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
 
 public class YandexDataProvider implements DataProvider {
-    protected String url;
-    protected String key;
+    protected final String url;
+    protected final String key;
 
-    public static final int REQUEST_TIMEOUT = 10000;
     public static final Map<String, String> langs;
     static {
         Map<String, String> hashMap = new HashMap<>();
@@ -24,6 +23,8 @@ public class YandexDataProvider implements DataProvider {
         hashMap.put("ru", "Russian");
         langs = Collections.unmodifiableMap(hashMap);
     }
+    private static final int TEXT_LIMIT = 5000;
+    private static final int REQUEST_TIMEOUT = 10000;
 
     public YandexDataProvider(String url, String key) {
         this.url = url;
@@ -31,7 +32,7 @@ public class YandexDataProvider implements DataProvider {
     }
 
     public int getTextLimit() {
-        return 5000;
+        return TEXT_LIMIT;
     }
 
     public String parseResponse(String response) {

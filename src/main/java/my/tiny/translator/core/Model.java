@@ -23,11 +23,7 @@ public class Model extends EventDispatcher {
     }
 
     public String getProperty(String name) {
-        String value = "";
-        if (hasProperty(name)) {
-            value = props.get(name);
-        }
-        return value;
+        return (hasProperty(name)) ? props.get(name) : "";
     }
 
     public boolean hasProperty(String name) {

@@ -178,6 +178,11 @@ public class MainActivity extends Activity {
         editor.apply();
     }
 
+    public String getSetting(String name, String defaultValue) {
+        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        return settings.getString(name, defaultValue);
+    }
+
     public void toggleKeyboard(EditText editText, boolean shown) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         if (shown) {
@@ -207,7 +212,9 @@ public class MainActivity extends Activity {
             public void onReceive(Context context, Intent intent) {
                 Bundle results = getResultExtras(true);
                 if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
-                    ArrayList<String> langs = results.getStringArrayList(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES);
+                    ArrayList<String> langs = results.getStringArrayList(
+                        RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES
+                    );
                     for (String lang : langs) {
                         lang = lang.split("-")[0];
                         if (!recognizerLangs.contains(lang)) {
@@ -394,6 +401,10 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 switch (event.type) {
+                    case "load":
+                        targetSpeakerPresenter.stop();
+                        break;
+
                     case "stop":
                         runOnUiThread(new Runnable() {
                             @Override
@@ -426,6 +437,10 @@ public class MainActivity extends Activity {
             @Override
             public void handleEvent(Event event) {
                 switch (event.type) {
+                    case "load":
+                        sourceSpeakerPresenter.stop();
+                        break;
+
                     case "stop":
                         runOnUiThread(new Runnable() {
                             @Override
@@ -505,7 +520,9 @@ public class MainActivity extends Activity {
                             TranslatorLang targetSelectedItem = (TranslatorLang) targetSpinner.getSelectedItem();
                             if (targetSelectedItem != null && value.equals(targetSelectedItem.code)) {
                                 targetSpinner.setSelection(
-                                    targetAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
+                                    targetAdapter.getPosition(
+                                        langMap.get(event.getDataValue("oldValue"))
+                                    )
                                 );
                             }
                             break;
@@ -518,7 +535,9 @@ public class MainActivity extends Activity {
                             TranslatorLang sourceSelectedItem = (TranslatorLang) sourceSpinner.getSelectedItem();
                             if (sourceSelectedItem != null && value.equals(sourceSelectedItem.code)) {
                                 sourceSpinner.setSelection(
-                                    sourceAdapter.getPosition(langMap.get(event.getDataValue("oldValue")))
+                                    sourceAdapter.getPosition(
+                                        langMap.get(event.getDataValue("oldValue"))
+                                    )
                                 );
                             }
                             break;
@@ -527,12 +546,12 @@ public class MainActivity extends Activity {
             }
         });
 
-        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        String sourceStartLang = settings.getString("sourceLang", TRANSLATOR_DEFAULT_SOURCELANG);
-        String targetStartLang = settings.getString("targetLang", TRANSLATOR_DEFAULT_TARGETLANG);
-
-        TranslatorLang sourceStartItem = langMap.get(sourceStartLang);
-        TranslatorLang targetStartItem = langMap.get(targetStartLang);
+        TranslatorLang sourceStartItem = langMap.get(
+            getSetting("sourceLang", TRANSLATOR_DEFAULT_SOURCELANG)
+        );
+        TranslatorLang targetStartItem = langMap.get(
+            getSetting("targetLang", TRANSLATOR_DEFAULT_TARGETLANG)
+        );
         if (sourceStartItem != null) {
             sourceSpinner.setSelection(
                 sourceAdapter.getPosition(sourceStartItem)

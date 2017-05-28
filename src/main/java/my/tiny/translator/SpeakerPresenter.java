@@ -17,15 +17,13 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDoubleTap(MotionEvent event) {
-            getModel().setSpeed(HALF_SPEED);
-            toggle();
+            toggle(HALF_SPEED);
             return true;
         }
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event) {
-            getModel().setSpeed(NORMAL_SPEED);
-            toggle();
+            toggle(NORMAL_SPEED);
             return true;
         }
     }
@@ -55,9 +53,11 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
         return speaking;
     }
 
-    public void toggle() {
+    private void toggle(float speed) {
+        SpeakerModel model = getModel();
         if (!stop()) {
-            getModel().speak();
+            model.setSpeed(speed);
+            model.speak();
         }
     }
 
@@ -76,6 +76,7 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
     @Override
     public void handleEvent(Event event) {
         switch (event.type) {
+            case "load":
             case "stop":
             case "start":
                 dispatchEvent(new Event(event.type));

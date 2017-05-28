@@ -30,6 +30,7 @@ public class YandexDictionaryProvider extends YandexDataProvider {
         arrayList.add("ru-it");
         dirs = Collections.unmodifiableList(arrayList);
     }
+    private static final int TEXT_LIMIT = 100;
 
     public YandexDictionaryProvider(String url, String key) {
         super(url, key);
@@ -37,7 +38,7 @@ public class YandexDictionaryProvider extends YandexDataProvider {
 
     @Override
     public int getTextLimit() {
-        return 100;
+        return TEXT_LIMIT;
     }
 
     @Override

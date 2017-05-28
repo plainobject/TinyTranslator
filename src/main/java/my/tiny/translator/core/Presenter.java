@@ -1,8 +1,8 @@
 package my.tiny.translator.core;
 
 public class Presenter<T1, T2> extends EventDispatcher {
-    private T1 view;
-    private T2 model;
+    private final T1 view;
+    private final T2 model;
 
     public Presenter(T1 view, T2 model) {
         this.view = view;

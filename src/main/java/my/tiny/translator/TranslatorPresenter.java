@@ -37,19 +37,12 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
 
     @Override
     public void handleEvent(Event event) {
-        if (event.type.equals("query")) {
-            dispatchEvent(new Event("query"));
-            return;
-        }
-
-        if (event.type.equals("error")) {
-            dispatchEvent(new Event("error"));
-            return;
-        }
-
-        if (event.type.equals("update")) {
-            dispatchEvent(new Event("update"));
-            return;
+        switch (event.type) {
+            case "error":
+            case "query":
+            case "update":
+                dispatchEvent(new Event(event.type));
+                return;
         }
 
         if (event.type.equals("change")) {
@@ -71,8 +64,9 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                     break;
 
                 case "translation":
-                    getView().setText(value);
-                    getView().setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);
+                    TextView view = getView();
+                    view.setText(value);
+                    view.setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);
                     Event innerEvent = new Event("change");
                     innerEvent.setDataValue("translation", value);
                     dispatchEvent(innerEvent);

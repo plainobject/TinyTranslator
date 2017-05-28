@@ -56,7 +56,11 @@ public final class Utils {
     }
 
     public static boolean hasLetterOrDigit(String text) {
-        for (int i = 0; i < text.length(); i++) {
+        if (text == null) {
+            return false;
+        }
+        int n = text.length();
+        for (int i = 0; i < n; i++) {
             if (Character.isLetterOrDigit(text.charAt(i))) {
                 return true;
             }

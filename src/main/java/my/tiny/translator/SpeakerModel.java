@@ -16,6 +16,7 @@ import my.tiny.translator.core.Model;
 
 public class SpeakerModel extends Model {
     private TextToSpeech tts;
+    private boolean speaking = false;
     private boolean initialized = false;
     private static final String UTTERANCE_ID = "12345";
 
@@ -40,42 +41,53 @@ public class SpeakerModel extends Model {
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onDone(final String utteranceId) {
-                dispatchEvent(new Event("stop"));
+                onStop();
             }
 
             @Override
             @Deprecated
             public void onError(final String utteranceId) {
-                dispatchEvent(new Event("stop"));
+                onStop();
             }
 
             @Override
             public void onError(final String utteranceId, final int errorCode) {
-                dispatchEvent(new Event("stop"));
+                onStop();
             }
 
             @Override
             public void onStart(final String utteranceId) {
-                dispatchEvent(new Event("start"));
+                onStart();
             }
         });
     }
 
     public void stop() {
         tts.stop();
-        dispatchEvent(new Event("stop"));
+        onStop();
     }
 
     public void speak() {
         if (!isValid()) {
             return;
         }
+        speaking = true;
+        dispatchEvent(new Event("load"));
         tts.setLanguage(getAvailableLocale());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             speakOld();
         } else {
             speakNew();
         }
+    }
+
+    private void onStop() {
+        speaking = false;
+        dispatchEvent(new Event("stop"));
+    }
+
+    private void onStart() {
+        dispatchEvent(new Event("start"));
     }
 
     @SuppressWarnings("deprecation")
@@ -103,13 +115,13 @@ public class SpeakerModel extends Model {
     @Override
     public boolean isValid() {
         String text = getProperty("text");
-        return initialized == true && !text.isEmpty() &&
+        return initialized && !text.isEmpty() &&
                text.length() < TextToSpeech.getMaxSpeechInputLength() &&
                Utils.hasLetterOrDigit(text) && getAvailableLocale() != null;
     }
 
     public boolean isSpeaking() {
-        return tts.isSpeaking();
+        return speaking;
     }
 
     public Locale getAvailableLocale() {
