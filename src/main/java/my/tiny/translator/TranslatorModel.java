@@ -1,35 +1,26 @@
 package my.tiny.translator;
 
 import java.util.HashMap;
-import android.os.AsyncTask;
 
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
 import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
+import my.tiny.translator.core.HTTPCallback;
 import my.tiny.translator.core.HTTPResponse;
 
 public class TranslatorModel extends Model {
+    protected HTTPRequest request;
     protected DataProvider dataProvider;
-    protected TranslateTask translateTask;
 
-    private class TranslateTask extends AsyncTask<HTTPRequest, Void, String> {
+    protected class RequestCallback extends HTTPCallback {
         @Override
-        protected String doInBackground(HTTPRequest... requests) {
-            HTTPResponse response = requests[0].send();
-            return (response.isOK()) ? response.text : null;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if (isCancelled()) {
-                return;
-            }
-            if (response == null) {
-                dispatchEvent(new Event("error"));
-            } else {
-                setProperty("translation", dataProvider.parseResponse(response));
+        public void onResponse(HTTPResponse response) {
+            if (response.isSuccessful()) {
+                setProperty("translation", dataProvider.parseResponse(response.text));
                 dispatchEvent(new Event("update"));
+            } else {
+                dispatchEvent(new Event("error"));
             }
         }
     }
@@ -49,24 +40,24 @@ public class TranslatorModel extends Model {
                !sourceLang.equals(targetLang);
     }
 
-    public void cancelTask() {
-        if (translateTask != null &&
-            translateTask.getStatus() != AsyncTask.Status.FINISHED) {
-            translateTask.cancel(true);
+    public void abortRequest() {
+        if (request != null) {
+            request.abort();
         }
+        request = null;
     }
 
     public void requestTranslation() {
-        cancelTask();
+        abortRequest();
         if (!isValid()) {
             return;
         }
         dispatchEvent(new Event("query"));
-        translateTask = new TranslateTask();
-        translateTask.execute(dataProvider.createRequest(
+        request = dataProvider.createRequest(
             getProperty("text"),
             getProperty("sourceLang"),
             getProperty("targetLang")
-        ));
+        );
+        request.send(new RequestCallback());
     }
 }

@@ -54,9 +54,8 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                 case "targetLang":
                     TranslatorModel model = getModel();
                     if (!model.isValid()) {
-                        model.cancelTask();
+                        abortRequest();
                         model.setProperty("translation", "");
-                        requestDebouncer.cancel();
                         dispatchEvent(new Event("invalid"));
                         break;
                     }
@@ -73,6 +72,11 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
                     break;
             }
         }
+    }
+
+    public void abortRequest() {
+        getModel().abortRequest();
+        requestDebouncer.cancel();
     }
 
     public void requestTranslation() {

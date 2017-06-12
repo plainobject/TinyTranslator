@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.HashMap;
+import android.os.AsyncTask;
 
 public class HTTPRequest {
     public static final String CHARSET = "UTF-8";
@@ -21,8 +22,32 @@ public class HTTPRequest {
 
     protected int timeout = 0;
     protected String url;
+    protected HTTPTask task;
     protected HashMap<String, String> urlParams = new HashMap<>();
     protected HashMap<String, String> bodyParams = new HashMap<>();
+
+    protected class HTTPTask extends AsyncTask<Void, Void, HTTPResponse> {
+        protected HTTPCallback callback;
+
+        public HTTPTask(HTTPCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected HTTPResponse doInBackground(Void... voids) {
+            return connect();
+        }
+
+        @Override
+        protected void onPostExecute(HTTPResponse response) {
+            if (isCancelled()) {
+                return;
+            }
+            if (callback != null) {
+                callback.onResponse(response);
+            }
+        }
+    }
 
     public HTTPRequest(String url) {
         if (url == null) {
@@ -55,7 +80,21 @@ public class HTTPRequest {
         }
     }
 
-    public HTTPResponse send() {
+    public void send(HTTPCallback callback) {
+        abort();
+        task = new HTTPTask(callback);
+        task.execute();
+    }
+
+    public void abort() {
+        if (task != null &&
+            task.getStatus() != AsyncTask.Status.FINISHED) {
+            task.cancel(true);
+        }
+        task = null;
+    }
+
+    protected HTTPResponse connect() {
         StringBuilder finalUrl = new StringBuilder(url);
         if (!urlParams.isEmpty()) {
             finalUrl.append(
