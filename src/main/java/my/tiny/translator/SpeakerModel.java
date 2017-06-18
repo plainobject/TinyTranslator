@@ -1,144 +1,92 @@
 package my.tiny.translator;
 
-import java.util.Map;
-import java.util.Locale;
-import java.util.HashMap;
-import java.util.Collections;
-import android.os.Build;
-import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.content.Context;
-import android.annotation.TargetApi;
 
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
 
-public class SpeakerModel extends Model {
-    private TextToSpeech tts;
-    private boolean speaking = false;
-    private boolean initialized = false;
-    private static final String UTTERANCE_ID = "12345";
+public class SpeakerModel extends Model implements TextToSpeechWrapper.TextToSpeechListener {
+    public static final String PROP_LANG = "lang";
+    public static final String PROP_RATE = "rate";
+    public static final String PROP_TEXT = "text";
+    public static final String EVENT_LOAD = "load";
+    public static final String EVENT_STOP = "stop";
+    public static final String EVENT_ERROR = "error";
+    public static final String EVENT_START = "start";
 
-    private static final Map<String, String> countryMap;
-    static {
-        Map<String, String> hashMap = new HashMap<>();
-        hashMap.put("en", "GB");
-        hashMap.put("es", "ES");
-        hashMap.put("fr", "FR");
-        countryMap = Collections.unmodifiableMap(hashMap);
+    private static TextToSpeechWrapper ttsWrapper;
+
+    private boolean ready;
+    private boolean speaking;
+
+    public static void init(Context context) {
+        if (ttsWrapper == null) {
+            ttsWrapper = new TextToSpeechWrapper(context);
+        }
     }
 
-    public SpeakerModel(Context context) {
-        tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    initialized = true;
-                }
-            }
-        });
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onDone(final String utteranceId) {
-                onStop();
-            }
-
-            @Override
-            @Deprecated
-            public void onError(final String utteranceId) {
-                onStop();
-            }
-
-            @Override
-            public void onError(final String utteranceId, final int errorCode) {
-                onStop();
-            }
-
-            @Override
-            public void onStart(final String utteranceId) {
-                onStart();
-            }
-        });
+    public static void stop() {
+        if (ttsWrapper != null) {
+            ttsWrapper.stop();
+        }
     }
 
-    public void stop() {
-        tts.stop();
-        onStop();
+    public static void destroy() {
+        if (ttsWrapper != null) {
+            ttsWrapper.destroy();
+        }
     }
 
     public void speak() {
         if (!isValid()) {
             return;
         }
-        speaking = true;
-        dispatchEvent(new Event("load"));
-        tts.setLanguage(getAvailableLocale());
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            speakOld();
+        stop();
+        ttsWrapper.setListener(this);
+        String rate = getProperty(PROP_RATE);
+        String lang = getProperty(PROP_LANG);
+        String text = getProperty(PROP_TEXT);
+        if (rate.isEmpty()) {
+            ttsWrapper.start(lang, text);
         } else {
-            speakNew();
+            ttsWrapper.start(Float.parseFloat(rate), lang, text);
         }
     }
 
-    private void onStop() {
+    @Override
+    public void onInit() {
+        ready = true;
+    }
+
+    @Override
+    public void onLoad() {
+        speaking = true;
+        dispatchEvent(new Event(EVENT_LOAD));
+    }
+
+    @Override
+    public void onStop(boolean error) {
         speaking = false;
-        dispatchEvent(new Event("stop"));
+        dispatchEvent(new Event(error ? EVENT_ERROR : EVENT_STOP));
     }
 
-    private void onStart() {
-        dispatchEvent(new Event("start"));
-    }
-
-    @SuppressWarnings("deprecation")
-    private void speakOld() {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, UTTERANCE_ID);
-        tts.speak(getProperty("text"), TextToSpeech.QUEUE_FLUSH, params);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void speakNew() {
-        Bundle params = new Bundle();
-        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, UTTERANCE_ID);
-        tts.speak(getProperty("text"), TextToSpeech.QUEUE_FLUSH, params, UTTERANCE_ID);
-    }
-
-    public int setSpeed(float speed) {
-        return tts.setSpeechRate(speed);
-    }
-
-    public void destroy() {
-        tts.shutdown();
+    @Override
+    public void onStart() {
+        dispatchEvent(new Event(EVENT_START));
     }
 
     @Override
     public boolean isValid() {
-        String text = getProperty("text");
-        return initialized && !text.isEmpty() &&
-               text.length() < TextToSpeech.getMaxSpeechInputLength() &&
-               Utils.hasLetterOrDigit(text) && getAvailableLocale() != null;
+        // Utils.hasLetterOrDigit(text)
+        return ready &&
+               ttsWrapper != null &&
+               ttsWrapper.isDataSupported(
+                   getProperty(PROP_LANG),
+                   getProperty(PROP_TEXT)
+               );
     }
 
     public boolean isSpeaking() {
         return speaking;
-    }
-
-    public Locale getAvailableLocale() {
-        String lang = getProperty("lang");
-        if (lang.isEmpty()) {
-            return null;
-        }
-        if (countryMap.containsKey(lang)) {
-            Locale countryLocale = new Locale(lang, countryMap.get(lang));
-            if (tts.isLanguageAvailable(countryLocale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
-                return countryLocale;
-            }
-        }
-        Locale locale = new Locale(lang);
-        if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_AVAILABLE) {
-            return locale;
-        }
-        return null;
     }
 }

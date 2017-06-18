@@ -1,6 +1,6 @@
 package my.tiny.translator;
 
-import java.util.Map;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,10 +9,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.style.CharacterStyle;
-import android.text.style.ParagraphStyle;
 import android.media.AudioManager;
 import android.widget.Toast;
 import android.widget.Button;
@@ -28,11 +24,9 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.SharedPreferences;
 import android.content.BroadcastReceiver;
-import android.graphics.Typeface;
 
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
-import my.tiny.translator.core.Routine;
 import my.tiny.translator.core.Debouncer;
 import my.tiny.translator.core.EventListener;
 
@@ -40,7 +34,8 @@ public class MainActivity extends Activity {
     private static final int PROGRESS_DELAY = 250;
     private static final int SPEECH_RECOGNIZER_CODE = 1;
     private static final int PROGRESS_FADE_DURATION = 200;
-    private static final String ICONFONT_FILENAME = "icons.ttf";
+    private static final String SETTING_SOURCE_LANG = "sourceLang";
+    private static final String SETTING_TARGET_LANG = "targetLang";
     private static final String MIMETYPE_TEXT_PLAIN = "text/plain";
     private static final String DICTIONARY_APIKEY = ""; // https://tech.yandex.ru/keys/get/?service=dict
     private static final String DICTIONARY_APIURL = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup";
@@ -48,24 +43,21 @@ public class MainActivity extends Activity {
     private static final String TRANSLATOR_APIURL = "https://translate.yandex.net/api/v1.5/tr.json/translate";
     private static final String TRANSLATOR_DEFAULT_SOURCELANG = "en";
     private static final String TRANSLATOR_DEFAULT_TARGETLANG = "ru";
-    private Model mainModel = new Model();
+    private Model mainModel = new MainModel();
     private ArrayList<String> recognizerLangs = new ArrayList<>();
-    private Typeface iconFont;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        iconFont = Typeface.createFromAsset(
-            getAssets(), ICONFONT_FILENAME
-        );
-
         initCopy();
         initSwap();
         initClear();
         initPaste();
+        initRetry();
         initShare();
+        initProgress();
         initSpeakers();
         initSpinners();
         initTextarea();
@@ -76,20 +68,20 @@ public class MainActivity extends Activity {
         onNewIntent(getIntent());
 
         if (isEmptyText()) {
-            mainModel.dispatchEvent(new Event("focus"));
+            mainModel.dispatchEvent(new Event(MainModel.EVENT_FOCUS));
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mainModel.dispatchEvent(new Event("pause"));
+        mainModel.dispatchEvent(new Event(MainModel.EVENT_PAUSE));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mainModel.dispatchEvent(new Event("destroy"));
+        mainModel.dispatchEvent(new Event(MainModel.EVENT_DESTROY));
     }
 
     @Override
@@ -110,7 +102,7 @@ public class MainActivity extends Activity {
         if (Intent.ACTION_SEND.equals(intentAction) && MIMETYPE_TEXT_PLAIN.equals(intentType)) {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (sharedText != null) {
-                mainModel.setProperty("text", sharedText);
+                mainModel.setProperty(MainModel.PROP_TEXT, sharedText);
             }
         }
     }
@@ -121,12 +113,12 @@ public class MainActivity extends Activity {
         if (requestCode == SPEECH_RECOGNIZER_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> list = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             String text = list.get(0);
-            text = Utils.capitalizeText(text, mainModel.getProperty("sourceLang"));
-            mainModel.setProperty("text", text);
+            text = Utils.capitalizeText(text, mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
+            mainModel.setProperty(MainModel.PROP_TEXT, text);
         }
     }
 
-    public void copyText(String text) {
+    public void putTextToClipboard(String text) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(ClipData.newPlainText("", text));
     }
@@ -139,27 +131,23 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    public boolean isMuted() {
+    public boolean isSoundMuted() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         return audioManager != null &&
                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0;
     }
 
-    public boolean pasteText() {
+    public String getTextFromClipboard() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard.hasPrimaryClip()) {
             ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-            String text = item.coerceToText(getApplicationContext()).toString();
-            if (!text.isEmpty()) {
-                mainModel.setProperty("text", text);
-                return true;
-            }
+            return item.coerceToText(getApplicationContext()).toString();
         }
-        return false;
+        return "";
     }
 
     public boolean isEmptyText() {
-        return mainModel.getProperty("text").isEmpty();
+        return mainModel.getProperty(MainModel.PROP_TEXT).isEmpty();
     }
 
     public void showToast(String text) {
@@ -167,8 +155,8 @@ public class MainActivity extends Activity {
     }
 
     public void clearText() {
-        mainModel.setProperty("text", "");
-        mainModel.dispatchEvent(new Event("focus"));
+        mainModel.setProperty(MainModel.PROP_TEXT, "");
+        mainModel.dispatchEvent(new Event(MainModel.EVENT_FOCUS));
     }
 
     public void setSetting(String name, String value) {
@@ -184,7 +172,7 @@ public class MainActivity extends Activity {
     }
 
     public void toggleKeyboard(EditText editText, boolean shown) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (shown) {
             imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
         } else {
@@ -233,21 +221,20 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     switch (event.getDataValue("name")) {
-                        case "translation":
+                        case MainModel.PROP_TRANSLATION:
                             copyButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
             }
         });
-        copyButton.setTypeface(iconFont);
-        copyButton.setVisibility(mainModel.getProperty("translation").isEmpty() ? View.GONE : View.VISIBLE);
+        copyButton.setVisibility(mainModel.getProperty(MainModel.PROP_TRANSLATION).isEmpty() ? View.GONE : View.VISIBLE);
         copyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyText(mainModel.getProperty("translation"));
+                putTextToClipboard(mainModel.getProperty(MainModel.PROP_TRANSLATION));
                 showToast(getString(R.string.messageCopy));
             }
         });
@@ -255,18 +242,17 @@ public class MainActivity extends Activity {
 
     public void initSwap() {
         final Button swapButton = (Button) findViewById(R.id.swapButton);
-        swapButton.setTypeface(iconFont);
         swapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String sourceLang = mainModel.getProperty("sourceLang");
-                String targetLang = mainModel.getProperty("targetLang");
-                String translation = mainModel.getProperty("translation");
+                String sourceLang = mainModel.getProperty(MainModel.PROP_SOURCE_LANG);
+                String targetLang = mainModel.getProperty(MainModel.PROP_TARGET_LANG);
+                String translation = mainModel.getProperty(MainModel.PROP_TRANSLATION);
                 if (!translation.isEmpty()) {
-                    mainModel.setProperty("text", translation);
+                    mainModel.setProperty(MainModel.PROP_TEXT, translation);
                 }
-                mainModel.setProperty("sourceLang", targetLang);
-                mainModel.setProperty("targetLang", sourceLang);
+                mainModel.setProperty(MainModel.PROP_SOURCE_LANG, targetLang);
+                mainModel.setProperty(MainModel.PROP_TARGET_LANG, sourceLang);
             }
         });
     }
@@ -276,16 +262,15 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     switch (event.getDataValue("name")) {
-                        case "text":
+                        case MainModel.PROP_TEXT:
                             clearButton.setVisibility(isEmptyText() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
             }
         });
-        clearButton.setTypeface(iconFont);
         clearButton.setVisibility(isEmptyText() ? View.GONE : View.VISIBLE);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -295,26 +280,49 @@ public class MainActivity extends Activity {
         });
     }
 
+    public void initRetry() {
+        final Button retryButton = (Button) findViewById(R.id.retryButton);
+        mainModel.addListener(new EventListener() {
+            @Override
+            public void handleEvent(Event event) {
+                switch (event.type) {
+                    case MainModel.EVENT_ERROR:
+                        retryButton.setVisibility(View.VISIBLE);
+                        break;
+
+                    case MainModel.EVENT_RESULT:
+                        retryButton.setVisibility(View.GONE);
+                        break;
+                }
+            }
+        });
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainModel.dispatchEvent(new Event(MainModel.EVENT_RETRY));
+            }
+        });
+    }
+
     public void initShare() {
         final Button shareButton = (Button) findViewById(R.id.shareButton);
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     switch (event.getDataValue("name")) {
-                        case "translation":
+                        case MainModel.PROP_TRANSLATION:
                             shareButton.setVisibility(event.getDataValue("value").isEmpty() ? View.GONE : View.VISIBLE);
                             break;
                     }
                 }
             }
         });
-        shareButton.setTypeface(iconFont);
-        shareButton.setVisibility(mainModel.getProperty("translation").isEmpty() ? View.GONE : View.VISIBLE);
+        shareButton.setVisibility(mainModel.getProperty(MainModel.PROP_TRANSLATION).isEmpty() ? View.GONE : View.VISIBLE);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                shareText(mainModel.getProperty("translation"));
+                shareText(mainModel.getProperty(MainModel.PROP_TRANSLATION));
             }
         });
     }
@@ -324,9 +332,9 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     switch (event.getDataValue("name")) {
-                        case "text":
+                        case MainModel.PROP_TEXT:
                             pasteButton.setVisibility(
                                 isEmptyText() ? View.VISIBLE : View.GONE
                             );
@@ -335,144 +343,137 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        pasteButton.setTypeface(iconFont);
         pasteButton.setVisibility(
             isEmptyText() ? View.VISIBLE : View.GONE
         );
         pasteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showToast(getString(pasteText() ?
-                    R.string.messagePaste :
-                    R.string.messagePasteEmpty
-                ));
+                String clipboardText = getTextFromClipboard();
+                if (clipboardText.isEmpty()) {
+                    showToast(getString(R.string.messagePasteEmpty));
+                } else {
+                    mainModel.setProperty(MainModel.PROP_TEXT, clipboardText);
+                }
+            }
+        });
+    }
+
+    public void initProgress() {
+        final View progressLayout = (View) findViewById(R.id.progressLayout);
+        final Debouncer progressDebouncer = new Debouncer(PROGRESS_DELAY, new Runnable() {
+            @Override
+            public void run() {
+                Utils.fadeInView(progressLayout, PROGRESS_FADE_DURATION);
+            }
+        });
+        mainModel.addListener(new EventListener() {
+            @Override
+            public void handleEvent(Event event) {
+                switch (event.type) {
+                    case MainModel.EVENT_QUERY:
+                        progressDebouncer.start();
+                        break;
+
+                    case MainModel.EVENT_ERROR:
+                    case MainModel.EVENT_RESULT:
+                        progressDebouncer.cancel();
+                        Utils.fadeOutView(progressLayout, PROGRESS_FADE_DURATION);
+                        break;
+
+                    case MainModel.EVENT_DESTROY:
+                        progressDebouncer.cancel();
+                        break;
+                }
             }
         });
     }
 
     public void initSpeakers() {
+        SpeakerModel.init(getApplicationContext());
         final Button sourceSpeakButton = (Button) findViewById(R.id.sourceSpeakButton);
         final Button targetSpeakButton = (Button) findViewById(R.id.targetSpeakButton);
-        SpeakerModel sourceSpeakerModel = new SpeakerModel(getApplicationContext());
-        SpeakerModel targetSpeakerModel = new SpeakerModel(getApplicationContext());
-        final SpeakerPresenter sourceSpeakerPresenter = new SpeakerPresenter(sourceSpeakButton, sourceSpeakerModel);
-        final SpeakerPresenter targetSpeakerPresenter = new SpeakerPresenter(targetSpeakButton, targetSpeakerModel);
+        final SpeakerModel sourceSpeakerModel = new SpeakerModel();
+        final SpeakerModel targetSpeakerModel = new SpeakerModel();
+        final SpeakerPresenter sourceSpeakerPresenter = new SpeakerPresenter(
+            sourceSpeakButton, sourceSpeakerModel
+        );
+        final SpeakerPresenter targetSpeakerPresenter = new SpeakerPresenter(
+            targetSpeakButton, targetSpeakerModel
+        );
 
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("pause")) {
-                    sourceSpeakerPresenter.stop();
-                    targetSpeakerPresenter.stop();
+                if (event.type.equals(MainModel.EVENT_PAUSE)) {
+                    SpeakerModel.stop();
                     return;
                 }
-                if (event.type.equals("change")) {
+                if (event.type.equals(MainModel.EVENT_DESTROY)) {
+                    SpeakerModel.destroy();
+                    return;
+                }
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     String value = event.getDataValue("value");
                     switch (event.getDataValue("name")) {
-                        case "text":
+                        case MainModel.PROP_TEXT:
                             sourceSpeakerPresenter.setText(value);
                             break;
 
-                        case "sourceLang":
+                        case MainModel.PROP_SOURCE_LANG:
                             sourceSpeakerPresenter.setLang(value);
                             break;
 
-                        case "targetLang":
+                        case MainModel.PROP_TARGET_LANG:
                             targetSpeakerPresenter.setLang(value);
                             break;
 
-                        case "translation":
+                        case MainModel.PROP_TRANSLATION:
                             targetSpeakerPresenter.setText(value);
                             break;
                     }
                     return;
                 }
-                if (event.type.equals("destroy")) {
-                    sourceSpeakerPresenter.destroy();
-                    targetSpeakerPresenter.destroy();
-                }
             }
         });
 
-        sourceSpeakButton.setTypeface(iconFont);
-        targetSpeakButton.setTypeface(iconFont);
-
-        sourceSpeakerPresenter.addListener(new EventListener() {
+        EventListener speakerEventListener = new EventListener() {
             @Override
             public void handleEvent(Event event) {
                 switch (event.type) {
-                    case "load":
-                        targetSpeakerPresenter.stop();
+                    case SpeakerModel.EVENT_STOP:
+                    case SpeakerModel.EVENT_ERROR:
+                        final boolean error = SpeakerModel.EVENT_ERROR.equals(event.type);
+                        if (error) {
+                            showToast(getString(R.string.messageSpeakerError));
+                        }
+                        String buttonSpeakText = getString(R.string.iconSpeak);
+                        sourceSpeakButton.setText(buttonSpeakText);
+                        targetSpeakButton.setText(buttonSpeakText);
                         break;
 
-                    case "stop":
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                sourceSpeakButton.setText(
-                                    getString(R.string.iconSpeak)
-                                );
-                            }
-                        });
-                        break;
-
-                    case "start":
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isMuted()) {
-                                    showToast(getString(R.string.messageMuted));
-                                }
-                                sourceSpeakButton.setText(
-                                    getString(R.string.iconPause)
-                                );
-                            }
-                        });
+                    case SpeakerModel.EVENT_START:
+                        if (isSoundMuted()) {
+                            showToast(getString(R.string.messageMuted));
+                        }
+                        String buttonPauseText = getString(R.string.iconPause);
+                        if (sourceSpeakerModel.isSpeaking()) {
+                            sourceSpeakButton.setText(buttonPauseText);
+                        } else {
+                            targetSpeakButton.setText(buttonPauseText);
+                        }
                         break;
                 }
             }
-        });
+        };
 
-        targetSpeakerPresenter.addListener(new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                switch (event.type) {
-                    case "load":
-                        sourceSpeakerPresenter.stop();
-                        break;
+        sourceSpeakerPresenter.addListener(speakerEventListener);
+        targetSpeakerPresenter.addListener(speakerEventListener);
 
-                    case "stop":
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                targetSpeakButton.setText(
-                                    getString(R.string.iconSpeak)
-                                );
-                            }
-                        });
-                        break;
-
-                    case "start":
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isMuted()) {
-                                    showToast(getString(R.string.messageMuted));
-                                }
-                                targetSpeakButton.setText(
-                                    getString(R.string.iconPause)
-                                );
-                            }
-                        });
-                        break;
-                }
-            }
-        });
-
-        sourceSpeakerPresenter.setText(mainModel.getProperty("text"));
-        sourceSpeakerPresenter.setLang(mainModel.getProperty("sourceLang"));
-        targetSpeakerPresenter.setLang(mainModel.getProperty("targetLang"));
-        targetSpeakerPresenter.setText(mainModel.getProperty("translation"));
+        sourceSpeakerPresenter.setText(mainModel.getProperty(MainModel.PROP_TEXT));
+        sourceSpeakerPresenter.setLang(mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
+        targetSpeakerPresenter.setLang(mainModel.getProperty(MainModel.PROP_TARGET_LANG));
+        targetSpeakerPresenter.setText(mainModel.getProperty(MainModel.PROP_TRANSLATION));
     }
 
     public void initSpinners() {
@@ -481,11 +482,11 @@ public class MainActivity extends Activity {
 
         final HashMap<String, TranslatorLang> langMap = new HashMap<>();
 
-        for (Map.Entry<String, String> entry : YandexDataProvider.langs.entrySet()) {
-            langMap.put(entry.getKey(), new TranslatorLang(entry.getKey(), entry.getValue()));
+        for (String lang : YandexDataProvider.LANGS) {
+            langMap.put(lang, new TranslatorLang(lang, Utils.getLanguageName(lang)));
         }
 
-        ArrayList<TranslatorLang> langList = new ArrayList<TranslatorLang>(langMap.values());
+        ArrayList<TranslatorLang> langList = new ArrayList<>(langMap.values());
 
         Collections.sort(langList, new Comparator<TranslatorLang>() {
             @Override
@@ -494,13 +495,13 @@ public class MainActivity extends Activity {
             }
         });
 
-        final ArrayAdapter<TranslatorLang> sourceAdapter = new ArrayAdapter<TranslatorLang>(
+        final ArrayAdapter<TranslatorLang> sourceAdapter = new ArrayAdapter<>(
             this, R.layout.spinner, langList
         );
         sourceAdapter.setDropDownViewResource(R.layout.option);
         sourceSpinner.setAdapter(sourceAdapter);
 
-        final ArrayAdapter<TranslatorLang> targetAdapter = new ArrayAdapter<TranslatorLang>(
+        final ArrayAdapter<TranslatorLang> targetAdapter = new ArrayAdapter<>(
             this, R.layout.spinner, langList
         );
         targetAdapter.setDropDownViewResource(R.layout.option);
@@ -509,11 +510,11 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     String value = event.getDataValue("value");
                     switch (event.getDataValue("name")) {
-                        case "sourceLang":
-                            setSetting("sourceLang", value);
+                        case MainModel.PROP_SOURCE_LANG:
+                            setSetting(SETTING_SOURCE_LANG, value);
                             sourceSpinner.setSelection(
                                 sourceAdapter.getPosition(langMap.get(value))
                             );
@@ -527,8 +528,8 @@ public class MainActivity extends Activity {
                             }
                             break;
 
-                        case "targetLang":
-                            setSetting("targetLang", value);
+                        case MainModel.PROP_TARGET_LANG:
+                            setSetting(SETTING_TARGET_LANG, value);
                             targetSpinner.setSelection(
                                 targetAdapter.getPosition(langMap.get(value))
                             );
@@ -547,10 +548,10 @@ public class MainActivity extends Activity {
         });
 
         TranslatorLang sourceStartItem = langMap.get(
-            getSetting("sourceLang", TRANSLATOR_DEFAULT_SOURCELANG)
+            getSetting(SETTING_SOURCE_LANG, TRANSLATOR_DEFAULT_SOURCELANG)
         );
         TranslatorLang targetStartItem = langMap.get(
-            getSetting("targetLang", TRANSLATOR_DEFAULT_TARGETLANG)
+            getSetting(SETTING_TARGET_LANG, TRANSLATOR_DEFAULT_TARGETLANG)
         );
         if (sourceStartItem != null) {
             sourceSpinner.setSelection(
@@ -567,7 +568,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 TranslatorLang sourceSelectedItem = (TranslatorLang) parent.getItemAtPosition(position);
-                mainModel.setProperty("sourceLang", sourceSelectedItem.code);
+                mainModel.setProperty(MainModel.PROP_SOURCE_LANG, sourceSelectedItem.code);
             }
 
             @Override
@@ -577,7 +578,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 TranslatorLang targetSelectedItem = (TranslatorLang) parent.getItemAtPosition(position);
-                mainModel.setProperty("targetLang", targetSelectedItem.code);
+                mainModel.setProperty(MainModel.PROP_TARGET_LANG, targetSelectedItem.code);
             }
 
             @Override
@@ -586,56 +587,43 @@ public class MainActivity extends Activity {
     }
 
     public void initTextarea() {
-        final EditText textarea = (EditText) findViewById(R.id.textarea);
-        textarea.addTextChangedListener(new TextWatcher() {
+        final TextArea textarea = (TextArea) findViewById(R.id.textarea);
+        textarea.setValueChangeListener(new TextArea.ValueChangeListener() {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mainModel.setProperty("text", s.toString());
-                if (count > 1) {
-                    Editable text = textarea.getText();
-                    Object[] spans = text.getSpans(
-                        0, text.length(), Object.class
-                    );
-                    for (Object span : spans) {
-                        if (span instanceof CharacterStyle ||
-                            span instanceof ParagraphStyle) {
-                            text.removeSpan(span);
-                        }
-                    }
-                }
+            public void onActionCut() {}
+
+            @Override
+            public void onActionCopy() {}
+
+            @Override
+            public void onActionPaste() {
+                // TODO
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void onValueChange(String value) {
+                mainModel.setProperty(MainModel.PROP_TEXT, value);
+            }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-        });
-        textarea.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
+            public void onFocusChange(boolean hasFocus) {
                 toggleKeyboard(textarea, hasFocus);
             }
         });
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("focus")) {
-                    textarea.requestFocus();
-                    toggleKeyboard(textarea, true);
-                    return;
-                }
-                if (event.type.equals("change")) {
-                    switch (event.getDataValue("name")) {
-                        case "text":
-                            String value = event.getDataValue("value");
-                            if (textarea.getText().toString().equals(value)) {
-                                break;
-                            }
-                            textarea.setText(value);
-                            textarea.setSelection(value.length());
-                            break;
-                    }
+                switch (event.type) {
+                    case MainModel.EVENT_FOCUS:
+                        textarea.requestFocus();
+                        toggleKeyboard(textarea, true);
+                        break;
+
+                    case MainModel.EVENT_CHANGE:
+                        if (MainModel.PROP_TEXT.equals(event.getDataValue("name"))) {
+                            textarea.setValue(event.getDataValue("value"));
+                        }
+                        break;
                 }
             }
         });
@@ -643,47 +631,38 @@ public class MainActivity extends Activity {
 
     public void initRecognizer() {
         final Button recognizeButton = (Button) findViewById(R.id.recognizeButton);
-        final Routine recognizerRoutine = new Routine() {
+        final Runnable recognizerRoutine = new Runnable() {
             @Override
-            public void call() {
+            public void run() {
                 boolean visible =
                     isEmptyText() &&
-                    recognizerLangs.contains(mainModel.getProperty("sourceLang"));
+                    recognizerLangs.contains(mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
                 recognizeButton.setVisibility(visible ? View.VISIBLE : View.GONE);
             }
         };
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("change")) {
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     switch (event.getDataValue("name")) {
-                        case "text":
-                        case "sourceLang":
-                            recognizerRoutine.call();
+                        case MainModel.PROP_TEXT:
+                        case MainModel.PROP_SOURCE_LANG:
+                            recognizerRoutine.run();
                             break;
                     }
                 }
             }
         });
-        recognizeButton.setTypeface(iconFont);
         recognizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recognizeSpeech(mainModel.getProperty("sourceLang"));
+                recognizeSpeech(mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
             }
         });
-        recognizerRoutine.call();
+        recognizerRoutine.run();
     }
 
     public void initTranslator() {
-        final Button retryButton = (Button) findViewById(R.id.retryButton);
-        final View progressLayout = (View) findViewById(R.id.progressLayout);
-        final Debouncer progressDebouncer = new Debouncer(PROGRESS_DELAY, new Runnable() {
-            @Override
-            public void run() {
-                Utils.fadeInView(progressLayout, PROGRESS_FADE_DURATION);
-            }
-        });
         TextView translatorView = (TextView) findViewById(R.id.translation);
         TranslatorModel translatorModel = new TranslatorModel(new YandexDataProvider(
             TRANSLATOR_APIURL,
@@ -696,67 +675,61 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("retry")) {
+                if (event.type.equals(MainModel.EVENT_RETRY)) {
                     translatorPresenter.requestTranslation();
                     return;
                 }
 
-                if (event.type.equals("change")) {
+                if (event.type.equals(MainModel.EVENT_DESTROY)) {
+                    translatorPresenter.abortRequest();
+                    return;
+                }
+
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     String value = event.getDataValue("value");
                     switch (event.getDataValue("name")) {
-                        case "text":
+                        case MainModel.PROP_TEXT:
                             translatorPresenter.setText(value);
                             break;
 
-                        case "sourceLang":
+                        case MainModel.PROP_SOURCE_LANG:
                             translatorPresenter.setSourceLang(value);
                             break;
 
-                        case "targetLang":
+                        case MainModel.PROP_TARGET_LANG:
                             translatorPresenter.setTargetLang(value);
                             break;
                     }
                 }
             }
         });
-        retryButton.setTypeface(iconFont);
-        retryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainModel.dispatchEvent(new Event("retry"));
-            }
-        });
         translatorPresenter.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
                 switch (event.type) {
-                    case "query":
-                        progressDebouncer.start();
+                    case TranslatorModel.EVENT_QUERY:
+                        mainModel.dispatchEvent(new Event(MainModel.EVENT_QUERY));
                         break;
 
-                    case "error":
-                        retryButton.setVisibility(View.VISIBLE);
-                        progressDebouncer.cancel();
-                        Utils.fadeOutView(progressLayout, PROGRESS_FADE_DURATION);
+                    case TranslatorModel.EVENT_ERROR:
+                        mainModel.dispatchEvent(new Event(MainModel.EVENT_ERROR));
                         showToast(getString(R.string.messageError));
                         break;
 
-                    case "change":
-                        mainModel.setProperty("translation", event.getDataValue("translation"));
+                    case TranslatorModel.EVENT_CHANGE:
+                        mainModel.setProperty(MainModel.PROP_TRANSLATION, event.getDataValue("translation"));
                         break;
 
-                    case "update":
+                    case TranslatorModel.EVENT_UPDATE:
                     case "invalid":
-                        retryButton.setVisibility(View.GONE);
-                        progressDebouncer.cancel();
-                        Utils.fadeOutView(progressLayout, PROGRESS_FADE_DURATION);
+                        mainModel.dispatchEvent(new Event(MainModel.EVENT_RESULT));
                         break;
                 }
             }
         });
-        translatorPresenter.setText(mainModel.getProperty("text"));
-        translatorPresenter.setSourceLang(mainModel.getProperty("sourceLang"));
-        translatorPresenter.setTargetLang(mainModel.getProperty("targetLang"));
+        translatorPresenter.setText(mainModel.getProperty(MainModel.PROP_TEXT));
+        translatorPresenter.setSourceLang(mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
+        translatorPresenter.setTargetLang(mainModel.getProperty(MainModel.PROP_TARGET_LANG));
     }
 
     public void initDictionary() {
@@ -772,31 +745,36 @@ public class MainActivity extends Activity {
         mainModel.addListener(new EventListener() {
             @Override
             public void handleEvent(Event event) {
-                if (event.type.equals("retry")) {
+                if (event.type.equals(MainModel.EVENT_RETRY)) {
                     dictionaryPresenter.requestTranslation();
                     return;
                 }
 
-                if (event.type.equals("change")) {
+                if (event.type.equals(MainModel.EVENT_DESTROY)) {
+                    dictionaryPresenter.abortRequest();
+                    return;
+                }
+
+                if (MainModel.EVENT_CHANGE.equals(event.type)) {
                     String value = event.getDataValue("value");
                     switch (event.getDataValue("name")) {
-                        case "text":
+                        case MainModel.PROP_TEXT:
                             dictionaryPresenter.setText(value);
                             break;
 
-                        case "sourceLang":
+                        case MainModel.PROP_SOURCE_LANG:
                             dictionaryPresenter.setSourceLang(value);
                             break;
 
-                        case "targetLang":
+                        case MainModel.PROP_TARGET_LANG:
                             dictionaryPresenter.setTargetLang(value);
                             break;
                     }
                 }
             }
         });
-        dictionaryPresenter.setText(mainModel.getProperty("text"));
-        dictionaryPresenter.setSourceLang(mainModel.getProperty("sourceLang"));
-        dictionaryPresenter.setTargetLang(mainModel.getProperty("targetLang"));
+        dictionaryPresenter.setText(mainModel.getProperty(MainModel.PROP_TEXT));
+        dictionaryPresenter.setSourceLang(mainModel.getProperty(MainModel.PROP_SOURCE_LANG));
+        dictionaryPresenter.setTargetLang(mainModel.getProperty(MainModel.PROP_TARGET_LANG));
     }
 }

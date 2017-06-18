@@ -11,10 +11,10 @@
     <string name="iconListen">&#xe802;</string>
 
     <string name="appName">TinyTranslator</string>
-    <string name="messageCopy">Translation has been copied to the clipboard</string>
+    <string name="messageCopy">Translation has been copied</string>
     <string name="placeholder">Type here to translate</string>
     <string name="messageError">Request has failed</string>
     <string name="messageMuted">The device is in silent mode</string>
-    <string name="messagePaste">Text has been pasted from the clipboard</string>
     <string name="messagePasteEmpty">Clipboard data is empty or invalid</string>
+    <string name="messageSpeakerError">Error occurred while speaking</string>
 </resources>

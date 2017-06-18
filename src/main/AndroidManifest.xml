@@ -4,8 +4,8 @@
     android:versionCode="1"
     android:versionName="1.0.0">
 
-    <uses-sdk android:minSdkVersion="19"
-              android:targetSdkVersion="25"/>
+    <uses-sdk android:minSdkVersion="17"
+              android:targetSdkVersion="26"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -13,8 +13,8 @@
         android:icon="@mipmap/icon"
         android:label="@string/appName"
         android:theme="@style/mainTheme"
-        android:allowBackup="false"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:allowBackup="false">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"

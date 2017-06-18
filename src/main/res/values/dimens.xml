@@ -4,4 +4,5 @@
     <dimen name="iconSize">24sp</dimen>
     <dimen name="iconDimen">48dp</dimen>
     <dimen name="toolbarHeight">56dp</dimen>
+    <dimen name="toolbarElevation">4dp</dimen>
 </resources>

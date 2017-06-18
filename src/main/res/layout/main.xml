@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
     <RelativeLayout
-        android:elevation="4dp"
+        android:elevation="@dimen/toolbarElevation"
         android:background="@color/main"
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbarHeight">
@@ -19,14 +19,13 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_toStartOf="@+id/swapButton"/>
-        <Button
+        <my.tiny.translator.FontButton
+            style="@style/iconButton"
             android:id="@+id/swapButton"
             android:text="@string/iconSwap"
-            android:textSize="@dimen/iconSize"
             android:textColor="@android:color/white"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="@dimen/toolbarHeight"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/toolbarHeight"
             android:layout_centerInParent="true"/>
         <Spinner
             android:id="@+id/targetLang"
@@ -40,15 +39,14 @@
         android:paddingTop="16dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingBottom="8dp"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <EditText
-            style="@style/TextBox"
+        <my.tiny.translator.TextArea
+            style="@style/textBox"
             android:id="@+id/textarea"
             android:hint="@string/placeholder"
-            android:maxLines="5"
+            android:maxLines="4"
             android:inputType="textMultiLine|textNoSuggestions"
             android:scrollbars="vertical"
             android:background="@drawable/textbox"/>
@@ -57,51 +55,31 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="@dimen/iconDimen">
-            <Button
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/retryButton"
                 android:text="@string/iconRetry"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/sourceSpeakButton"
                 android:text="@string/iconSpeak"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/clearButton"
                 android:text="@string/iconClear"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/recognizeButton"
                 android:text="@string/iconListen"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/pasteButton"
                 android:text="@string/iconPaste"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
     <RelativeLayout
@@ -123,12 +101,12 @@
                 android:layout_height="wrap_content"
                 android:focusableInTouchMode="true">
                 <TextView
-                    style="@style/TextBox"
+                    style="@style/textBox"
                     android:id="@+id/translation"
                     android:visibility="gone"
                     android:textIsSelectable="true"/>
                 <TextView
-                    style="@style/TextBox"
+                    style="@style/textBox"
                     android:id="@+id/dictionary"
                     android:textColor="@color/gray"
                     android:visibility="gone"
@@ -144,33 +122,21 @@
             android:layout_marginTop="-64dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp">
-            <Button
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/copyButton"
                 android:text="@string/iconCopy"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/targetSpeakButton"
                 android:text="@string/iconSpeak"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
-            <Button
+                android:visibility="gone"/>
+            <my.tiny.translator.FontButton
+                style="@style/iconButton"
                 android:id="@+id/shareButton"
                 android:text="@string/iconShare"
-                android:textSize="@dimen/iconSize"
-                android:textColor="@color/main"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
-                android:layout_width="@dimen/iconDimen"
-                android:layout_height="match_parent"/>
+                android:visibility="gone"/>
         </LinearLayout>
         <RelativeLayout
             android:id="@+id/progressLayout"

@@ -12,7 +12,7 @@ import my.tiny.translator.core.EventListener;
 public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements EventListener {
     private static final float HALF_SPEED = 0.5f;
     private static final float NORMAL_SPEED = 1f;
-    private GestureDetector gestureDetector;
+    private final GestureDetector gestureDetector;
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
@@ -45,46 +45,44 @@ public class SpeakerPresenter extends Presenter<Button, SpeakerModel> implements
     }
 
     public boolean stop() {
-        SpeakerModel model = getModel();
-        boolean speaking = model.isSpeaking();
+        boolean speaking = getModel().isSpeaking();
         if (speaking) {
-            model.stop();
+            SpeakerModel.stop();
         }
         return speaking;
     }
 
-    private void toggle(float speed) {
-        SpeakerModel model = getModel();
+    private void toggle(float rate) {
         if (!stop()) {
-            model.setSpeed(speed);
-            model.speak();
+            setRate(rate);
+            getModel().speak();
         }
     }
 
-    public void destroy() {
-        getModel().destroy();
+    public void setLang(String lang) {
+        getModel().setProperty(SpeakerModel.PROP_LANG, lang);
+    }
+
+    public void setRate(float rate) {
+        getModel().setProperty(SpeakerModel.PROP_RATE, String.valueOf(rate));
     }
 
     public void setText(String text) {
-        getModel().setProperty("text", Utils.normalizeText(text));
-    }
-
-    public void setLang(String lang) {
-        getModel().setProperty("lang", lang);
+        getModel().setProperty(SpeakerModel.PROP_TEXT, Utils.normalizeText(text));
     }
 
     @Override
     public void handleEvent(Event event) {
         switch (event.type) {
-            case "load":
-            case "stop":
-            case "start":
+            case SpeakerModel.EVENT_LOAD:
+            case SpeakerModel.EVENT_STOP:
+            case SpeakerModel.EVENT_START:
                 dispatchEvent(new Event(event.type));
                 break;
 
-            case "change":
+            case SpeakerModel.EVENT_CHANGE:
+                stop();
                 getView().setVisibility(getModel().isValid() ? View.VISIBLE : View.GONE);
-                getModel().stop();
                 break;
         }
     }

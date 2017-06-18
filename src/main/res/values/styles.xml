@@ -8,4 +8,20 @@
     <style name="splashTheme" parent="mainTheme">
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
+
+    <style name="textBox" parent="@android:style/TextAppearance.Medium">
+        <item name="android:padding">8dp</item>
+        <item name="android:textSize">@dimen/textSize</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="iconButton">
+        <item name="fontPath">icons.ttf</item>
+        <item name="android:textSize">@dimen/iconSize</item>
+        <item name="android:textColor">@color/main</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_width">@dimen/iconDimen</item>
+        <item name="android:layout_height">@dimen/iconDimen</item>
+    </style>
 </resources>

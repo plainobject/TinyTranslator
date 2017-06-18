@@ -1,21 +1,32 @@
 package my.tiny.translator.core;
 
+import java.util.Map;
 import java.util.HashMap;
 
 public class Model extends EventDispatcher {
-    private HashMap<String, String> props = new HashMap<>();
+    public static final String EMPTY_VALUE = "";
+    public static final String EVENT_CHANGE = "change";
+
+    private Map<String, String> props = new HashMap<>();
 
     public boolean isValid() {
         return true;
     }
 
     public void setProperty(String name, String value) {
+        setProperty(name, value, false);
+    }
+
+    public void setProperty(String name, String value, boolean silent) {
         String oldValue = getProperty(name);
-        if (value.equals(oldValue)) {
+        if (oldValue.equals(value)) {
             return;
         }
         props.put(name, value);
-        Event event = new Event("change");
+        if (silent) {
+            return;
+        }
+        Event event = new Event(EVENT_CHANGE);
         event.setDataValue("name", name);
         event.setDataValue("value", value);
         event.setDataValue("oldValue", oldValue);
@@ -23,10 +34,7 @@ public class Model extends EventDispatcher {
     }
 
     public String getProperty(String name) {
-        return (hasProperty(name)) ? props.get(name) : "";
-    }
-
-    public boolean hasProperty(String name) {
-        return props.containsKey(name);
+        String value = props.get(name);
+        return (value == null) ? EMPTY_VALUE : value;
     }
 }

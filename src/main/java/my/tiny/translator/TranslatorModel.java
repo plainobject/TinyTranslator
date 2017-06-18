@@ -1,39 +1,45 @@
 package my.tiny.translator;
 
-import java.util.HashMap;
-
 import my.tiny.translator.core.Event;
 import my.tiny.translator.core.Model;
-import my.tiny.translator.core.HTTPRequest;
 import my.tiny.translator.core.DataProvider;
-import my.tiny.translator.core.HTTPCallback;
-import my.tiny.translator.core.HTTPResponse;
+import my.tiny.translator.core.EventListener;
 
-public class TranslatorModel extends Model {
-    protected HTTPRequest request;
+public class TranslatorModel extends Model implements EventListener {
+    public static final String PROP_TEXT = "text";
+    public static final String PROP_SOURCE_LANG = "sourceLang";
+    public static final String PROP_TARGET_LANG = "targetLang";
+    public static final String PROP_TRANSLATION = "translation";
+    public static final String EVENT_ERROR = "error";
+    public static final String EVENT_QUERY = "query";
+    public static final String EVENT_UPDATE = "update";
+
     protected DataProvider dataProvider;
 
-    protected class RequestCallback extends HTTPCallback {
-        @Override
-        public void onResponse(HTTPResponse response) {
-            if (response.isSuccessful()) {
-                setProperty("translation", dataProvider.parseResponse(response.text));
-                dispatchEvent(new Event("update"));
-            } else {
-                dispatchEvent(new Event("error"));
-            }
-        }
-    }
-
     public TranslatorModel(DataProvider dataProvider) {
+        dataProvider.addListener(this);
         this.dataProvider = dataProvider;
     }
 
     @Override
+    public void handleEvent(Event event) {
+        switch (event.type) {
+            case DataProvider.EVENT_ERROR:
+                dispatchEvent(new Event(EVENT_ERROR));
+                break;
+
+            case DataProvider.EVENT_RESULT:
+                setProperty(PROP_TRANSLATION, event.getDataValue("data"));
+                dispatchEvent(new Event(EVENT_UPDATE));
+                break;
+        }
+    }
+
+    @Override
     public boolean isValid() {
-        String text = getProperty("text");
-        String sourceLang = getProperty("sourceLang");
-        String targetLang = getProperty("targetLang");
+        String text = getProperty(PROP_TEXT);
+        String sourceLang = getProperty(PROP_SOURCE_LANG);
+        String targetLang = getProperty(PROP_TARGET_LANG);
         return !text.isEmpty() && text.length() < dataProvider.getTextLimit() &&
                !sourceLang.isEmpty() && dataProvider.isLanguageSupported(sourceLang) &&
                !targetLang.isEmpty() && dataProvider.isLanguageSupported(targetLang) &&
@@ -41,10 +47,7 @@ public class TranslatorModel extends Model {
     }
 
     public void abortRequest() {
-        if (request != null) {
-            request.abort();
-        }
-        request = null;
+        dataProvider.abortRequest();
     }
 
     public void requestTranslation() {
@@ -52,12 +55,11 @@ public class TranslatorModel extends Model {
         if (!isValid()) {
             return;
         }
-        dispatchEvent(new Event("query"));
-        request = dataProvider.createRequest(
-            getProperty("text"),
-            getProperty("sourceLang"),
-            getProperty("targetLang")
+        dispatchEvent(new Event(EVENT_QUERY));
+        dataProvider.requestData(
+            getProperty(PROP_TEXT),
+            getProperty(PROP_SOURCE_LANG),
+            getProperty(PROP_TARGET_LANG)
         );
-        request.send(new RequestCallback());
     }
 }

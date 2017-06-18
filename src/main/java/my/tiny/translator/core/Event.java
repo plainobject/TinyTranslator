@@ -1,16 +1,17 @@
 package my.tiny.translator.core;
 
+import java.util.Map;
 import java.util.HashMap;
 
 public class Event {
     public final String type;
-    protected HashMap<String, String> data = new HashMap<>();
+    protected Map<String, String> data = new HashMap<>();
 
     public Event(String type) {
         this(type, null);
     }
 
-    public Event(String type, HashMap<String, String> data) {
+    public Event(String type, Map<String, String> data) {
         if (type == null) {
             throw new IllegalArgumentException("Invalid type");
         }

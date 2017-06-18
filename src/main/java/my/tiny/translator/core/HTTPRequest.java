@@ -6,54 +6,37 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.net.HttpURLConnection;
-import java.util.Map;
-import java.util.HashMap;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.net.Uri;
+import android.text.TextUtils;
 
 public class HTTPRequest {
-    public static final String CHARSET = "UTF-8";
-    public static final String QUERY_DELIMITER = "?";
-    public static final String PARAM_DELIMITER = "&";
-    public static final String VALUE_DELIMITER = "=";
-    public static final String CONTENT_TYPE_FIELD = "Content-Type";
-    public static final String CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded";
+    private static final String CHARSET = "UTF-8";
+    private static final String CONTENT_TYPE_FIELD = "Content-Type";
+    private static final String CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded";
 
-    protected int timeout = 0;
-    protected String url;
-    protected HTTPTask task;
-    protected HashMap<String, String> urlParams = new HashMap<>();
-    protected HashMap<String, String> bodyParams = new HashMap<>();
+    private int timeout;
+    private volatile boolean cancelled;
+    private Uri.Builder urlBuilder;
+    private Uri.Builder bodyBuilder;
+    private HTTPCallback callback;
 
-    protected class HTTPTask extends AsyncTask<Void, Void, HTTPResponse> {
-        protected HTTPCallback callback;
-
-        public HTTPTask(HTTPCallback callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        protected HTTPResponse doInBackground(Void... voids) {
-            return connect();
-        }
-
-        @Override
-        protected void onPostExecute(HTTPResponse response) {
-            if (isCancelled()) {
-                return;
-            }
-            if (callback != null) {
-                callback.onResponse(response);
-            }
-        }
+    public HTTPRequest(String baseUrl) {
+        this(baseUrl, null);
     }
 
-    public HTTPRequest(String url) {
-        if (url == null) {
-            throw new IllegalArgumentException("Invalid URL");
+    public HTTPRequest(String baseUrl, HTTPCallback callback) {
+        if (TextUtils.isEmpty(baseUrl)) {
+            throw new IllegalArgumentException("Invalid baseUrl!");
         }
-        this.url = url;
+        urlBuilder = Uri.parse(baseUrl).buildUpon();
+        bodyBuilder = new Uri.Builder();
+        this.callback = callback;
+    }
+
+    public void cancel() {
+        cancelled = true;
     }
 
     public void setTimeout(int timeout) {
@@ -61,87 +44,65 @@ public class HTTPRequest {
     }
 
     public void addUrlParam(String param, String value) {
-        urlParams.put(param, value);
+        urlBuilder.appendQueryParameter(param, value);
     }
 
     public void addBodyParam(String param, String value) {
-        bodyParams.put(param, value);
+        bodyBuilder.appendQueryParameter(param, value);
     }
 
-    public void setUrlParams(Map<String, String> params) {
-        if (params != null) {
-            urlParams.putAll(params);
+    public void send() {
+        if (cancelled) {
+            return;
         }
-    }
-
-    public void setBodyParams(Map<String, String> params) {
-        if (params != null) {
-            bodyParams.putAll(params);
+        HTTPResponse response = connect();
+        if (callback != null && !cancelled) {
+            callback.postResponse(response);
         }
-    }
-
-    public void send(HTTPCallback callback) {
-        abort();
-        task = new HTTPTask(callback);
-        task.execute();
-    }
-
-    public void abort() {
-        if (task != null &&
-            task.getStatus() != AsyncTask.Status.FINISHED) {
-            task.cancel(true);
-        }
-        task = null;
     }
 
     protected HTTPResponse connect() {
-        StringBuilder finalUrl = new StringBuilder(url);
-        if (!urlParams.isEmpty()) {
-            finalUrl.append(
-                finalUrl.indexOf(QUERY_DELIMITER) < 0 ?
-                    QUERY_DELIMITER :
-                    PARAM_DELIMITER
-            );
-            finalUrl.append(toQueryString(urlParams));
-        }
-
-        int responseCode = -1;
+        int responseCode = 0;
         String responseText = "";
+        InputStream responseStream = null;
         HttpURLConnection connection = null;
         try {
-            URL urlObj = new URL(finalUrl.toString());
+            URL urlObj = new URL(urlBuilder.build().toString());
             connection = (HttpURLConnection) urlObj.openConnection();
             connection.setReadTimeout(timeout);
             connection.setConnectTimeout(timeout);
 
-            if (!bodyParams.isEmpty()) {
+            String bodyParams = bodyBuilder.build().getQuery();
+            if (!TextUtils.isEmpty(bodyParams)) {
                 connection.setDoOutput(true);
                 connection.setRequestProperty(
                     CONTENT_TYPE_FIELD,
                     CONTENT_TYPE_VALUE
                 );
-                String bodyParamsString = toQueryString(bodyParams);
                 connection.setFixedLengthStreamingMode(
-                    bodyParamsString.getBytes().length
+                    bodyParams.getBytes().length
                 );
                 BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(connection.getOutputStream())
+                    new OutputStreamWriter(connection.getOutputStream(), CHARSET)
                 );
-                writer.write(bodyParamsString);
+                writer.write(bodyParams);
                 writer.close();
             }
 
             responseCode = connection.getResponseCode();
-            InputStream responseStream = connection.getErrorStream();
+            responseStream = connection.getErrorStream();
             if (responseStream == null) {
                 responseStream = connection.getInputStream();
             }
             responseText = convertStreamToString(responseStream);
-            responseStream.close();
         } catch (Exception exception) {
-            responseCode = 0;
             responseText = exception.getMessage();
         } finally {
+            if (responseStream != null) {
+                try {
+                    responseStream.close();
+                } catch (Exception exception) {}
+            }
             if (connection != null) {
                 connection.disconnect();
             }
@@ -149,38 +110,13 @@ public class HTTPRequest {
         return new HTTPResponse(responseCode, responseText);
     }
 
-    public static String encodeValue(String value) {
-        try {
-            return URLEncoder.encode(value, CHARSET);
-        } catch (Exception exception) {
-            return value;
-        }
-    }
-
-    public static String toQueryString(Map<String, String> map) {
+    private static String convertStreamToString(final InputStream stream) throws Exception {
+        String line;
         StringBuilder result = new StringBuilder();
-
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            result.append(PARAM_DELIMITER);
-            result.append(encodeValue(entry.getKey()));
-            result.append(VALUE_DELIMITER);
-            result.append(encodeValue(entry.getValue()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, CHARSET));
+        while ((line = reader.readLine()) != null) {
+            result.append(line);
         }
-
-        return result.substring(PARAM_DELIMITER.length());
-    }
-
-    public static String convertStreamToString(InputStream stream) {
-        try {
-            String line;
-            StringBuilder result = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
-            return result.toString();
-        } catch (Exception exception) {
-            return "";
-        }
+        return result.toString();
     }
 }

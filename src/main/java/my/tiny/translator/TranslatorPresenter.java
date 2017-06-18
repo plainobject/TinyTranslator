@@ -24,45 +24,45 @@ public class TranslatorPresenter extends Presenter<TextView, TranslatorModel> im
     }
 
     public void setText(String text) {
-        getModel().setProperty("text", Utils.normalizeText(text));
+        getModel().setProperty(TranslatorModel.PROP_TEXT, Utils.normalizeText(text));
     }
 
     public void setSourceLang(String lang) {
-        getModel().setProperty("sourceLang", lang);
+        getModel().setProperty(TranslatorModel.PROP_SOURCE_LANG, lang);
     }
 
     public void setTargetLang(String lang) {
-        getModel().setProperty("targetLang", lang);
+        getModel().setProperty(TranslatorModel.PROP_TARGET_LANG, lang);
     }
 
     @Override
     public void handleEvent(Event event) {
         switch (event.type) {
-            case "error":
-            case "query":
-            case "update":
+            case TranslatorModel.EVENT_ERROR:
+            case TranslatorModel.EVENT_QUERY:
+            case TranslatorModel.EVENT_UPDATE:
                 dispatchEvent(new Event(event.type));
                 return;
         }
 
-        if (event.type.equals("change")) {
+        if (event.type.equals(TranslatorModel.EVENT_CHANGE)) {
             String name = event.getDataValue("name");
             String value = event.getDataValue("value");
             switch (name) {
-                case "text":
-                case "sourceLang":
-                case "targetLang":
+                case TranslatorModel.PROP_TEXT:
+                case TranslatorModel.PROP_SOURCE_LANG:
+                case TranslatorModel.PROP_TARGET_LANG:
                     TranslatorModel model = getModel();
                     if (!model.isValid()) {
                         abortRequest();
-                        model.setProperty("translation", "");
+                        model.setProperty(TranslatorModel.PROP_TRANSLATION, "");
                         dispatchEvent(new Event("invalid"));
                         break;
                     }
                     requestTranslation();
                     break;
 
-                case "translation":
+                case TranslatorModel.PROP_TRANSLATION:
                     TextView view = getView();
                     view.setText(value);
                     view.setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);

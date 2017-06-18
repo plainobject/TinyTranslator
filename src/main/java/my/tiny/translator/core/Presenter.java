@@ -1,6 +1,8 @@
 package my.tiny.translator.core;
 
-public class Presenter<T1, T2> extends EventDispatcher {
+import android.view.View;
+
+public class Presenter<T1 extends View, T2 extends Model> extends EventDispatcher {
     private final T1 view;
     private final T2 model;
 

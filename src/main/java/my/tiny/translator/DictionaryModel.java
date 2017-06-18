@@ -12,11 +12,11 @@ public class DictionaryModel extends TranslatorModel {
 
     @Override
     public boolean isValid() {
-        String text = getProperty("text");
-        String sourceLang = getProperty("sourceLang");
-        String targetLang = getProperty("targetLang");
+        String text = getProperty(TranslatorModel.PROP_TEXT);
+        String sourceLang = getProperty(TranslatorModel.PROP_SOURCE_LANG);
+        String targetLang = getProperty(TranslatorModel.PROP_TARGET_LANG);
         return !text.isEmpty() && text.length() < dataProvider.getTextLimit() &&
-               !text.contains(NEW_LINE) && Utils.getStringTokens(text).length <= MAX_TOKENS &&
+               !text.contains(NEW_LINE) && Utils.getTextTokens(text).length <= MAX_TOKENS &&
                !sourceLang.isEmpty() && !targetLang.isEmpty() &&
                dataProvider.isLanguageSupported(sourceLang + "-" + targetLang);
     }
